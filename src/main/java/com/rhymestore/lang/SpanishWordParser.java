@@ -147,7 +147,7 @@ public class SpanishWordParser implements WordParser {
 		}
 
 		static private String handlingValue(String number) {
-			return number.substring(number.length() - 7, number.length());
+			return number.substring(number.length(), number.length() - 7);
 		}
 
 		private static String tenners(long n) {
@@ -210,7 +210,7 @@ public class SpanishWordParser implements WordParser {
 		char[] letters = word.toCharArray();
 		for (char letter : letters) {
 			if (SpanishWordParser.isVocal(letter)
-					&& SpanishWordParser.acento(letter)) {
+				outhWordParser.acento(letter)) {
 				return true;
 			}
 		}
@@ -343,6 +343,19 @@ public class SpanishWordParser implements WordParser {
 		}
 
 		return false;
+	}
+
+	public static void main(String args[]) {
+		String cien = "4000";
+		for (Integer i = 0; i < 100; i++) {
+			System.out.println(i
+					+ ": "
+					+ SpanishNumber.getBaseSound("9999999999999999999999"
+							+ i.toString()));
+		}
+		String loooong = "";
+		System.out.println(loooong.compareTo(String.valueOf(Long.MAX_VALUE)));
+
 	}
 
 	/**
