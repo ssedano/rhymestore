@@ -25,44 +25,22 @@ package com.rhymestore.lang;
 import java.util.Arrays;
 import java.util.List;
 
+import com.rhymestore.lang.SpanishWordParser.SpanishNumber;
+
 /**
  * Utility methods to manipulate text.
  * 
  * @author Ignasi Barrera
  */
-public class WordUtils
-{
-	/**
-	 * Gets the last word of the given sentence.
-	 * 
-	 * @param sentence The sentence to parse.
-	 * @return The last word of the given sentence.
-	 */
-	public static String getLastWord(final String sentence)
-	{
-		String word = "";
-
-		if (sentence != null)
-		{
-			List<String> words = Arrays.asList(sentence.split(" "));
-
-			if (words.size() > 0)
-			{
-				word = words.get(words.size() - 1);
-			}
-		}
-
-		return word;
-	}
-
+public class WordUtils {
 	/**
 	 * Capitalizes the given String.
 	 * 
-	 * @param str The String to capitalize.
+	 * @param str
+	 *            The String to capitalize.
 	 * @return The capitalized String.
 	 */
-	public static String capitalize(final String str)
-	{
+	public static String capitalize(final String str) {
 		switch (str.length()) {
 		case 0:
 			return str;
@@ -73,4 +51,58 @@ public class WordUtils
 		}
 	}
 
+	/**
+	 * Gets the last word of the given sentence.
+	 * 
+	 * @param sentence
+	 *            The sentence to parse.
+	 * @return The last word of the given sentence.
+	 */
+	public static String getLastWord(final String sentence) {
+		String last = null;
+
+		if (sentence != null) {
+			List<String> words = Arrays.asList(sentence.split(" "));
+
+			for (String word : words) {
+				if (WordUtils.isWord(word)) {
+					last = word;
+					break;
+				}
+				if (WordUtils.isNumber(word)) {
+					String sound = SpanishNumber.getBaseSound(word);
+
+					if (sound != null) {
+
+						last = sound;// ()
+						break;
+					}
+				}
+			}
+		}
+		return last;
+	}
+
+	public static boolean isNumber(String word) {
+		char[] letters = SpanishWordParser.removeTrailingPunctuation(word)
+				.toCharArray();
+		for (char c : letters) {
+			if (!Character.isDigit(c)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public static boolean isWord(String word) {
+
+		char[] letters = SpanishWordParser.removeTrailingPunctuation(word)
+				.toCharArray();
+		for (char c : letters) {
+			if (!SpanishWordParser.isLetter(c)) {
+				return false;
+			}
+		}
+		return true;
+	}
 }

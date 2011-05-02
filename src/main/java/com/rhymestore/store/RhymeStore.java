@@ -54,311 +54,302 @@ import com.rhymestore.lang.WordUtils;
  * @see Jedis
  * @see WordParser
  */
-public class RhymeStore
-{
-    /** The logger. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(RhymeStore.class);
+public class RhymeStore {
+	/** The logger. */
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(RhymeStore.class);
 
-    /** The Redis database API. */
-    protected final Jedis redis;
+	/** The Redis database API. */
+	protected final Jedis redis;
 
-    /** Redis namespace for sentences. */
-    private final Keymaker sentencens = new Keymaker("sentence");
+	/** Redis namespace for sentences. */
+	private final Keymaker sentencens = new Keymaker("sentence");
 
-    /** Redis namespace for index. */
-    private final Keymaker indexns = new Keymaker("index");
+	/** Redis namespace for index. */
+	private final Keymaker indexns = new Keymaker("index");
 
-    /** The character encoding to use. */
-    private final String encoding = "UTF-8";
+	/** The character encoding to use. */
+	private final String encoding = "UTF-8";
 
-    /** The singleton instance of the store. */
-    public static RhymeStore instance;
+	/** The singleton instance of the store. */
+	public static RhymeStore instance;
 
-    /** Parses the words to get the part used to rhyme. */
-    private final WordParser wordParser;
+	/**
+	 * Gets the singleton instance of the store.
+	 * 
+	 * @return The singleton instance of the store.
+	 */
+	public static RhymeStore getInstance() {
+		if (RhymeStore.instance == null) {
+			RhymeStore.instance = new RhymeStore();
+		}
 
-    /** The DAO used to persist the rhymes. */
-    // private RedisDao<Rhyme> rhymeDAO;
+		return RhymeStore.instance;
+	}
 
-    /**
-     * Gets the singleton instance of the store.
-     * 
-     * @return The singleton instance of the store.
-     */
-    public static RhymeStore getInstance()
-    {
-        if (instance == null)
-        {
-            instance = new RhymeStore();
-        }
+	/** The DAO used to persist the rhymes. */
+	// private RedisDao<Rhyme> rhymeDAO;
 
-        return instance;
-    }
+	/** Parses the words to get the part used to rhyme. */
+	private final WordParser wordParser;
 
-    /**
-     * Creates a new <code>RhymeStore</code> connecting to <code>localhost</code> and the default
-     * Redis port.
-     */
-    protected RhymeStore()
-    {
-        String host = Configuration.getConfigValue(Configuration.REDIS_HOST_PROPERTY);
-        String port = Configuration.getConfigValue(Configuration.REDIS_PORT_PROPERTY);
+	/**
+	 * Creates a new <code>RhymeStore</code> connecting to
+	 * <code>localhost</code> and the default Redis port.
+	 */
+	protected RhymeStore() {
+		String host = Configuration
+				.getConfigValue(Configuration.REDIS_HOST_PROPERTY);
+		String port = Configuration
+				.getConfigValue(Configuration.REDIS_PORT_PROPERTY);
 
-        redis = new Jedis(host, Integer.valueOf(port));
-        wordParser = WordParserFactory.getWordParser();
-        // rhymeDAO = RedisDaoFactory.getDAO(Rhyme.class);
-    }
+		this.redis = new Jedis(host, Integer.valueOf(port));
+		this.wordParser = WordParserFactory.getWordParser();
+		// rhymeDAO = RedisDaoFactory.getDAO(Rhyme.class);
+	}
 
-    /**
-     * Adds the given rhyme to the Redis database.
-     * 
-     * @param sentence The rhyme to add.
-     * @throws IOException If an error occurs while adding the rhyme.
-     */
-    public void add(final String sentence) throws IOException
-    {
-        String word = WordUtils.getLastWord(sentence);
+	/**
+	 * Adds the given rhyme to the Redis database.
+	 * 
+	 * @param sentence
+	 *            The rhyme to add.
+	 * @throws IOException
+	 *             If an error occurs while adding the rhyme.
+	 */
+	public void add(final String sentence) throws IOException {
+		String word = WordUtils.getLastWord(sentence);
 
-        if (word.isEmpty())
-        {
-            return;
-        }
+		if (word.isEmpty()) {
+			return;
+		}
 
-        // Get the rhyme and type (and check that the word is valid before
-        // adding)
-        String rhyme = normalizeString(wordParser.phoneticRhymePart(word));
-        StressType type = wordParser.stressType(word);
+		// Get the rhyme and type (and check that the word is valid before
+		// adding)
+		String rhyme = this.normalizeString(this.wordParser
+				.phoneticRhymePart(word));
+		StressType type = this.wordParser.stressType(word);
 
-        connect();
+		this.connect();
 
-        String sentenceId = getUniqueId(sentencens, normalizeString(sentence));
-        sentenceId = sentencens.build(sentenceId).toString();
+		String sentenceId = this.getUniqueId(this.sentencens,
+				this.normalizeString(sentence));
+		sentenceId = this.sentencens.build(sentenceId).toString();
 
-        if (redis.exists(sentenceId) == 1)
-        {
-            disconnect();
-            return;
-        }
+		if (this.redis.exists(sentenceId) == 1) {
+			this.disconnect();
+			return;
+		}
 
-        // Insert sentence
-        redis.set(sentenceId, URLEncoder.encode(sentence, encoding));
+		// Insert sentence
+		this.redis.set(sentenceId, URLEncoder.encode(sentence, this.encoding));
 
-        // Index sentence
-        String indexId = getUniqueId(indexns, buildUniqueToken(rhyme, type));
-        indexId = indexns.build(indexId).toString();
+		// Index sentence
+		String indexId = this.getUniqueId(this.indexns,
+				this.buildUniqueToken(rhyme, type));
+		indexId = this.indexns.build(indexId).toString();
 
-        redis.sadd(indexId, sentenceId);
+		this.redis.sadd(indexId, sentenceId);
 
-        disconnect();
+		this.disconnect();
 
-        LOGGER.info("Added rhyme: {}", sentence);
-    }
+		RhymeStore.LOGGER.info("Added rhyme: {}", sentence);
+	}
 
-    /**
-     * Deletes the given rhyme from the Redis database.
-     * 
-     * @param sentence The rhyme to delete.
-     * @throws IOException If an error occurs while deleting the rhyme.
-     */
-    public void delete(final String sentence) throws IOException
-    {
-        throw new UnsupportedOperationException("Delete operation is not implemented yet.");
-    }
+	protected String buildUniqueToken(final String rhyme, final StressType type) {
+		return this.sum(type.name().concat(rhyme));
+	}
 
-    /**
-     * Search for rhymes for the given sentence.
-     * 
-     * @param rhyme The rhyme to search.
-     * @param type The <code>StressType</code> of the rhyme to search.
-     * @return A <code>Set</code> of rhymes for the given sentence.
-     * @throws IOException If an error occurs while searching for the rhymes.
-     */
-    protected Set<String> search(final String rhyme, final StressType type) throws IOException
-    {
-        Set<String> rhymes = new HashSet<String>();
-        String norm = normalizeString(rhyme);
+	/**
+	 * Connects to the Redis database.
+	 * 
+	 * @throws UnknownHostException
+	 *             If the target host does not respond.
+	 * @throws IOException
+	 *             If an error occurs while connecting.
+	 */
+	protected void connect() throws UnknownHostException, IOException {
+		if (!this.redis.isConnected()) {
+			this.redis.connect();
+		}
+	}
 
-        String uniqueId = getUniqueIdKey(indexns, buildUniqueToken(norm, type));
+	/**
+	 * Deletes the given rhyme from the Redis database.
+	 * 
+	 * @param sentence
+	 *            The rhyme to delete.
+	 * @throws IOException
+	 *             If an error occurs while deleting the rhyme.
+	 */
+	public void delete(final String sentence) throws IOException {
+		throw new UnsupportedOperationException(
+				"Delete operation is not implemented yet.");
+	}
 
-        if (redis.exists(uniqueId) == 1)
-        {
-            String indexId = redis.get(uniqueId);
-            indexId = indexns.build(indexId).toString();
+	/**
+	 * Disconnects from the Redis database.
+	 * 
+	 * @throws IOException
+	 *             If an error occurs while disconnecting.
+	 */
+	protected void disconnect() throws IOException {
+		if (this.redis.isConnected()) {
+			this.redis.disconnect();
+		}
+	}
 
-            if (redis.exists(indexId) == 1)
-            {
-                for (String id : redis.smembers(indexId))
-                {
-                    if (redis.exists(id) == 1)
-                    {
-                        rhymes.add(URLDecoder.decode(redis.get(id), encoding));
-                    }
-                }
-            }
-        }
+	/**
+	 * Gets all the stored rhymes.
+	 * 
+	 * @return A <code>Set</code> with all the stored rhymes.
+	 * @throws IOException
+	 *             If the rhymes cannot be obtained.
+	 */
+	public Set<String> findAll() throws IOException {
+		Set<String> rhymes = new HashSet<String>();
 
-        return rhymes;
-    }
+		this.connect();
 
-    protected String buildUniqueToken(final String rhyme, final StressType type)
-    {
-        return sum(type.name().concat(rhyme));
-    }
+		String lastId = this.getLastId(this.sentencens);
 
-    protected String getUniqueIdKey(final Keymaker ns, final String token)
-    {
-        String md = sum(token);
-        return ns.build(md, "id").toString();
-    }
+		if (lastId != null) {
+			Integer n = Integer.parseInt(this.getLastId(this.sentencens));
 
-    protected String getUniqueId(final Keymaker ns, final String token)
-    {
-        String key = getUniqueIdKey(ns, token);
-        String id = redis.get(key);
+			for (int i = 1; i <= n; i++) {
+				String id = this.sentencens.build(String.valueOf(i)).toString();
 
-        if (id != null)
-        {
-            return id;
-        }
+				if (this.redis.exists(id) == 1) {
+					rhymes.add(URLDecoder.decode(this.redis.get(id),
+							this.encoding));
+				}
+			}
+		}
 
-        Integer next = redis.incr(ns.build("next.id").toString());
-        id = next.toString();
+		this.disconnect();
 
-        if (redis.setnx(key, id) == 0)
-        {
-            id = redis.get(key);
-        }
+		return rhymes;
+	}
 
-        return id;
-    }
+	protected String getLastId(final Keymaker ns) {
+		return this.redis.get(ns.build("next.id").toString());
+	}
 
-    protected String getLastId(final Keymaker ns)
-    {
-        return redis.get(ns.build("next.id").toString());
-    }
+	/**
+	 * Gets a rhyme for the given sentence.
+	 * 
+	 * @param sentence
+	 *            The sentence to rhyme.
+	 * @return The rhyme.
+	 */
+	public String getRhyme(final String sentence) throws IOException {
+		String lastWord = WordUtils.getLastWord(sentence);
 
-    /**
-     * Makes a md5 sum of the given text.
-     * 
-     * @param value The text to sum.
-     * @return The md5 sum of the given text.
-     */
-    protected String sum(final String value)
-    {
-        return DigestUtils.md5Hex(value.getBytes());
-    }
+		String rhymepart = this.wordParser.phoneticRhymePart(lastWord);
+		StressType type = this.wordParser.stressType(lastWord);
 
-    /**
-     * Connects to the Redis database.
-     * 
-     * @throws UnknownHostException If the target host does not respond.
-     * @throws IOException If an error occurs while connecting.
-     */
-    protected void connect() throws UnknownHostException, IOException
-    {
-        if (!redis.isConnected())
-        {
-            redis.connect();
-        }
-    }
+		RhymeStore.LOGGER.debug("Finding rhymes for {}", sentence);
 
-    /**
-     * Disconnects from the Redis database.
-     * 
-     * @throws IOException If an error occurs while disconnecting.
-     */
-    protected void disconnect() throws IOException
-    {
-        if (redis.isConnected())
-        {
-            redis.disconnect();
-        }
-    }
+		this.connect();
 
-    protected String normalizeString(final String value)
-    {
-        // To lower case
-        String token = value.toLowerCase();
+		Set<String> rhymes = this.search(rhymepart, type);
 
-        // Remove diacritics
-        token = Normalizer.normalize(token, Form.NFD);
-        token = token.replaceAll("[^\\p{ASCII}]", "");
+		this.disconnect();
 
-        // Remove non alphanumeric characters
-        token = token.replaceAll("[^a-zA-Z0-9]", "");
+		if (rhymes.isEmpty()) {
+			// If no rhyme is found, return the default rhyme
+			return this.wordParser.getDefaultRhyme();
+		} else {
+			// Otherwise, return a random rhyme
+			List<String> rhymeList = new ArrayList<String>(rhymes);
 
-        return token;
-    }
+			Random random = new Random(System.currentTimeMillis());
+			int index = random.nextInt(rhymeList.size());
 
-    /**
-     * Gets all the stored rhymes.
-     * 
-     * @return A <code>Set</code> with all the stored rhymes.
-     * @throws IOException If the rhymes cannot be obtained.
-     */
-    public Set<String> findAll() throws IOException
-    {
-        Set<String> rhymes = new HashSet<String>();
+			return rhymeList.get(index);
+		}
+	}
 
-        connect();
+	protected String getUniqueId(final Keymaker ns, final String token) {
+		String key = this.getUniqueIdKey(ns, token);
+		String id = this.redis.get(key);
 
-        String lastId = getLastId(sentencens);
+		if (id != null) {
+			return id;
+		}
 
-        if (lastId != null)
-        {
-            Integer n = Integer.parseInt(getLastId(sentencens));
+		Integer next = this.redis.incr(ns.build("next.id").toString());
+		id = next.toString();
 
-            for (int i = 1; i <= n; i++)
-            {
-                String id = sentencens.build(String.valueOf(i)).toString();
+		if (this.redis.setnx(key, id) == 0) {
+			id = this.redis.get(key);
+		}
 
-                if (redis.exists(id) == 1)
-                {
-                    rhymes.add(URLDecoder.decode(redis.get(id), encoding));
-                }
-            }
-        }
+		return id;
+	}
 
-        disconnect();
+	protected String getUniqueIdKey(final Keymaker ns, final String token) {
+		String md = this.sum(token);
+		return ns.build(md, "id").toString();
+	}
 
-        return rhymes;
-    }
+	protected String normalizeString(final String value) {
+		// To lower case
+		String token = value.toLowerCase();
 
-    /**
-     * Gets a rhyme for the given sentence.
-     * 
-     * @param sentence The sentence to rhyme.
-     * @return The rhyme.
-     */
-    public String getRhyme(final String sentence) throws IOException
-    {
-        String lastWord = WordUtils.getLastWord(sentence);
+		// Remove diacritics
+		token = Normalizer.normalize(token, Form.NFD);
+		token = token.replaceAll("[^\\p{ASCII}]", "");
 
-        String rhymepart = wordParser.phoneticRhymePart(lastWord);
-        StressType type = wordParser.stressType(lastWord);
+		// Remove non alphanumeric characters
+		token = token.replaceAll("[^a-zA-Z0-9]", "");
 
-        LOGGER.debug("Finding rhymes for {}", sentence);
+		return token;
+	}
 
-        connect();
+	/**
+	 * Search for rhymes for the given sentence.
+	 * 
+	 * @param rhyme
+	 *            The rhyme to search.
+	 * @param type
+	 *            The <code>StressType</code> of the rhyme to search.
+	 * @return A <code>Set</code> of rhymes for the given sentence.
+	 * @throws IOException
+	 *             If an error occurs while searching for the rhymes.
+	 */
+	protected Set<String> search(final String rhyme, final StressType type)
+			throws IOException {
+		Set<String> rhymes = new HashSet<String>();
+		String norm = this.normalizeString(rhyme);
 
-        Set<String> rhymes = search(rhymepart, type);
+		String uniqueId = this.getUniqueIdKey(this.indexns,
+				this.buildUniqueToken(norm, type));
 
-        disconnect();
+		if (this.redis.exists(uniqueId) == 1) {
+			String indexId = this.redis.get(uniqueId);
+			indexId = this.indexns.build(indexId).toString();
 
-        if (rhymes.isEmpty())
-        {
-            // If no rhyme is found, return the default rhyme
-            return wordParser.getDefaultRhyme();
-        }
-        else
-        {
-            // Otherwise, return a random rhyme
-            List<String> rhymeList = new ArrayList<String>(rhymes);
+			if (this.redis.exists(indexId) == 1) {
+				for (String id : this.redis.smembers(indexId)) {
+					if (this.redis.exists(id) == 1) {
+						rhymes.add(URLDecoder.decode(this.redis.get(id),
+								this.encoding));
+					}
+				}
+			}
+		}
 
-            Random random = new Random(System.currentTimeMillis());
-            int index = random.nextInt(rhymeList.size());
+		return rhymes;
+	}
 
-            return rhymeList.get(index);
-        }
-    }
+	/**
+	 * Makes a md5 sum of the given text.
+	 * 
+	 * @param value
+	 *            The text to sum.
+	 * @return The md5 sum of the given text.
+	 */
+	protected String sum(final String value) {
+		return DigestUtils.md5Hex(value.getBytes());
+	}
 }
