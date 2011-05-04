@@ -35,6 +35,22 @@ public interface WordParser {
 	 */
 	public String getDefaultRhyme();
 
+	/**
+	 * Checks if the specified character is a valid letter.
+	 * 
+	 * @param letter
+	 *            The character to check.
+	 * @return Boolean indicating if the specified character is a valid letter.
+	 */
+	public boolean isLetter(final char letter);
+
+	/**
+	 * Checks if the text is a Number.
+	 * 
+	 * @param text
+	 *            the text to eval.
+	 * @return true if it is a number, false otherwise.
+	 */
 	public boolean isNumber(String text);
 
 	/**

@@ -22,10 +22,7 @@
 
 package com.rhymestore.lang;
 
-import static com.rhymestore.lang.WordUtils.capitalize;
-import static com.rhymestore.lang.WordUtils.getLastWord;
-import static org.testng.Assert.assertEquals;
-
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -36,16 +33,9 @@ import org.testng.annotations.Test;
  * 
  * @author Ignasi Barrera
  */
-public abstract class AbstractWordParserTest
-{
+public abstract class AbstractWordParserTest {
 	/** The word parser. */
 	protected WordParser wordParser;
-
-	@BeforeMethod
-	public void setUp()
-	{
-		wordParser = getWordParser();
-	}
 
 	/**
 	 * Gets the {@link WordParser} to test.
@@ -54,44 +44,36 @@ public abstract class AbstractWordParserTest
 	 */
 	protected abstract WordParser getWordParser();
 
+	@BeforeMethod
+	public void setUp() {
+		this.wordParser = this.getWordParser();
+	}
+
 	// Common tests
 
 	@Test
-	public void testCapitalize()
-	{
-		assertEquals(capitalize(""), "");
-		assertEquals(capitalize("a"), "A");
-		assertEquals(capitalize("word"), "Word");
-		assertEquals(capitalize("capitalize test"), "Capitalize test");
+	public void testCapitalize() {
+		Assert.assertEquals(WordUtils.capitalize(""), "");
+		Assert.assertEquals(WordUtils.capitalize("a"), "A");
+		Assert.assertEquals(WordUtils.capitalize("word"), "Word");
+		Assert.assertEquals(WordUtils.capitalize("capitalize test"),
+		"Capitalize test");
 	}
 
+	/**
+	 * Tests the {@link WordParser#getDefaultRhyme()} method.
+	 */
 	@Test
-	public void testGetLastWord()
-	{
-		assertEquals(getLastWord(""), "");
-		assertEquals(getLastWord("test"), "test");
-		assertEquals(getLastWord("two words"), "words");
-	}
+	public abstract void testGetDefaultRhyme();
 
 	// Tests to be implemented by each WordParser implementation tests
 
-	/**
-	 * Tests the {@link WordParser#phoneticRhymePart(String)} method.
-	 */
 	@Test
-	public abstract void testPhoneticRhymePart();
-
-	/**
-	 * Tests the {@link WordParser#stressType(String)} method.
-	 */
-	@Test
-	public abstract void testStressType();
-
-	/**
-	 * Tests the {@link WordParser#rhyme(String, String)} method.
-	 */
-	@Test
-	public abstract void testRhyme();
+	public void testGetLastWord() {
+		Assert.assertEquals(WordUtils.getLastWord(""), "");
+		Assert.assertEquals(WordUtils.getLastWord("test"), "test");
+		Assert.assertEquals(WordUtils.getLastWord("two words"), "words");
+	}
 
 	/**
 	 * Tests the {@link WordParser#isLetter(char)} method.
@@ -100,15 +82,33 @@ public abstract class AbstractWordParserTest
 	public abstract void testIsLetter();
 
 	/**
+	 * Tests the {@link WordParser#isNumber(String))} method.
+	 */
+	@Test
+	public abstract void testIsNumber();
+
+	/**
 	 * Tests the {@link WordParser#isWord(String)} method.
 	 */
 	@Test
 	public abstract void testIsWord();
 
 	/**
-	 * Tests the {@link WordParser#getDefaultRhyme()} method.
+	 * Tests the {@link WordParser#phoneticRhymePart(String)} method.
 	 */
 	@Test
-	public abstract void testGetDefaultRhyme();
+	public abstract void testPhoneticRhymePart();
+
+	/**
+	 * Tests the {@link WordParser#rhyme(String, String)} method.
+	 */
+	@Test
+	public abstract void testRhyme();
+
+	/**
+	 * Tests the {@link WordParser#stressType(String)} method.
+	 */
+	@Test
+	public abstract void testStressType();
 
 }

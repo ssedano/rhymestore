@@ -22,157 +22,175 @@
 
 package com.rhymestore.lang;
 
-import org.testng.Assert;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Random;
 
 /**
  * Unit tests for the {@link SpanishWordParser}.
  * 
  * @author Ignasi Barrera
  */
-public class SpanishWordParserTest extends AbstractWordParserTest {
-	@Override
-	protected WordParser getWordParser() {
-		return new SpanishWordParser();
+public class SpanishWordParserTest extends AbstractWordParserTest
+{
+    @Override
+    protected WordParser getWordParser()
+    {
+        return new SpanishWordParser();
+    }
+
+    @Override
+    public void testPhoneticRhymePart()
+    {
+        assertEquals(wordParser.phoneticRhymePart(""), "");
+
+        // Monosilabos
+        assertEquals(wordParser.phoneticRhymePart("pez"), "ez");
+
+        // Agudas
+        assertEquals(wordParser.phoneticRhymePart("correr"), "er");
+        assertEquals(wordParser.phoneticRhymePart("melón"), "on");
+
+        // Llanas
+        assertEquals(wordParser.phoneticRhymePart("lío"), "io");
+        assertEquals(wordParser.phoneticRhymePart("carromato"), "ato");
+        assertEquals(wordParser.phoneticRhymePart("Telecinco"), "inco");
+        assertEquals(wordParser.phoneticRhymePart("abogado"), "ado");
+        assertEquals(wordParser.phoneticRhymePart("auriculares"), "ares");
+        assertEquals(wordParser.phoneticRhymePart("canoa"), "oa");
+
+        // Esdrújulcas y sobreesdrújulas
+        assertEquals(wordParser.phoneticRhymePart("cáspita"), "aspita");
+        assertEquals(wordParser.phoneticRhymePart("recuérdamelo"), "erdamelo");
+
+        // Casos foneticos especiales => sustitucion de consonantes
+        assertEquals(wordParser.phoneticRhymePart("suyo"), "ullo");
+        assertEquals(wordParser.phoneticRhymePart("barullo"), "ullo");
+        assertEquals(wordParser.phoneticRhymePart("barba"), "arva");
+        assertEquals(wordParser.phoneticRhymePart("parva"), "arva");
+        assertEquals(wordParser.phoneticRhymePart("gong"), "ong");
+        assertEquals(wordParser.phoneticRhymePart("falange"), "anje");
+        assertEquals(wordParser.phoneticRhymePart("alfanje"), "anje");
+        assertEquals(wordParser.phoneticRhymePart("cacho"), "acho");
+
+        // Palabra imposible pero caso contemplado
+        assertEquals(wordParser.phoneticRhymePart("gargáreha"), "area");
+    }
+
+    @Override
+    public void testStressType()
+    {
+        assertEquals(wordParser.stressType("pez"), StressType.LAST);
+        assertEquals(wordParser.stressType("correr"), StressType.LAST);
+        assertEquals(wordParser.stressType("lío"), StressType.SECOND_LAST);
+        assertEquals(wordParser.stressType("carromato"), StressType.SECOND_LAST);
+        assertEquals(wordParser.stressType("cáspita"), StressType.THIRD_LAST);
+        assertEquals(wordParser.stressType("recuérdamelo"), StressType.FOURTH_LAST);
+    }
+
+    @Override
+    public void testRhyme()
+    {
+        // Rhymes withoud punctuation
+        assertTrue(wordParser.rhyme("", ""));
+        assertTrue(wordParser.rhyme("pez", "hez"));
+        assertTrue(wordParser.rhyme("tres", "revés"));
+        assertTrue(wordParser.rhyme("Telecinco", "hinco"));
+        assertTrue(wordParser.rhyme("nabo", "centavo"));
+        assertTrue(wordParser.rhyme("falange", "alfanje"));
+        assertTrue(wordParser.rhyme("parva", "escarba"));
+        assertTrue(wordParser.rhyme("tuyo", "murmullo"));
+
+        // Rhymes with punctuation
+        assertTrue(wordParser.rhyme("cantar.", "pescar"));
+        assertTrue(wordParser.rhyme("calor!", "motor?"));
+        assertTrue(wordParser.rhyme("calor  ", "motor&;'?="));
+        
+	// TODO one rhyme with every number (sound).Rhymes with numbers
+	assertTrue(wordParser.rhyme(
+	        SpanishWordParser.SpanishNumber.getBaseSound(1L), "tuno"));
+		assertTrue(wordParser.rhyme(
+		        SpanishWordParser.SpanishNumber.getBaseSound("88,88"), "cocho"));
+		assertTrue(wordParser.rhyme(
+		        SpanishWordParser.SpanishNumber.getBaseSound("88.88"), "cocho"));
 	}
 
-	@Override
-	public void testGetDefaultRhyme() {
-		Assert.assertEquals(this.wordParser.getDefaultRhyme(),
-				SpanishWordParser.DEFAULT_RHYME);
-	}
+    @Override
+    public void testIsLetter()
+    {
+        // Valid letters
 
-	@Override
-	public void testIsLetter() {
-		// Valid letters
+        assertTrue(wordParser.isLetter('a'));
+        assertTrue(wordParser.isLetter('A'));
+        assertTrue(wordParser.isLetter('z'));
+        assertTrue(wordParser.isLetter('Z'));
+        assertTrue(wordParser.isLetter('m'));
+        assertTrue(wordParser.isLetter('M'));
 
-		Assert.assertTrue(SpanishWordParser.isLetter('a'));
-		Assert.assertTrue(SpanishWordParser.isLetter('A'));
-		Assert.assertTrue(SpanishWordParser.isLetter('z'));
-		Assert.assertTrue(SpanishWordParser.isLetter('Z'));
-		Assert.assertTrue(SpanishWordParser.isLetter('m'));
-		Assert.assertTrue(SpanishWordParser.isLetter('M'));
+        assertTrue(wordParser.isLetter('á'));
+        assertTrue(wordParser.isLetter('é'));
+        assertTrue(wordParser.isLetter('í'));
+        assertTrue(wordParser.isLetter('ó'));
+        assertTrue(wordParser.isLetter('ú'));
+        assertTrue(wordParser.isLetter('ü'));
 
-		Assert.assertTrue(SpanishWordParser.isLetter('á'));
-		Assert.assertTrue(SpanishWordParser.isLetter('é'));
-		Assert.assertTrue(SpanishWordParser.isLetter('í'));
-		Assert.assertTrue(SpanishWordParser.isLetter('ó'));
-		Assert.assertTrue(SpanishWordParser.isLetter('ú'));
-		Assert.assertTrue(SpanishWordParser.isLetter('ü'));
+        assertTrue(wordParser.isLetter('Á'));
+        assertTrue(wordParser.isLetter('É'));
+        assertTrue(wordParser.isLetter('Í'));
+        assertTrue(wordParser.isLetter('Ó'));
+        assertTrue(wordParser.isLetter('Ú'));
+        assertTrue(wordParser.isLetter('Ü'));
 
-		Assert.assertTrue(SpanishWordParser.isLetter('Á'));
-		Assert.assertTrue(SpanishWordParser.isLetter('É'));
-		Assert.assertTrue(SpanishWordParser.isLetter('Í'));
-		Assert.assertTrue(SpanishWordParser.isLetter('Ó'));
-		Assert.assertTrue(SpanishWordParser.isLetter('Ú'));
-		Assert.assertTrue(SpanishWordParser.isLetter('Ü'));
+        assertTrue(wordParser.isLetter('Ñ'));
+        assertTrue(wordParser.isLetter('ñ'));
 
-		Assert.assertTrue(SpanishWordParser.isLetter('Ñ'));
-		Assert.assertTrue(SpanishWordParser.isLetter('ñ'));
+        // Invalid Letters
 
-		// Invalid Letters
+        assertFalse(wordParser.isLetter(';'));
+        assertFalse(wordParser.isLetter(' '));
+        assertFalse(wordParser.isLetter('&'));
+        assertFalse(wordParser.isLetter('.'));
+        assertFalse(wordParser.isLetter(','));
+        assertFalse(wordParser.isLetter(';'));
+        assertFalse(wordParser.isLetter('-'));
+    }
 
-		Assert.assertFalse(SpanishWordParser.isLetter(';'));
-		Assert.assertFalse(SpanishWordParser.isLetter(' '));
-		Assert.assertFalse(SpanishWordParser.isLetter('&'));
-		Assert.assertFalse(SpanishWordParser.isLetter('.'));
-		Assert.assertFalse(SpanishWordParser.isLetter(','));
-		Assert.assertFalse(SpanishWordParser.isLetter(';'));
-		Assert.assertFalse(SpanishWordParser.isLetter('-'));
-	}
+    @Override
+    public void testIsWord()
+    {
+        // Valid words
+        assertTrue(wordParser.isWord("hola"));
+        assertTrue(wordParser.isWord("test"));
+        assertTrue(wordParser.isWord("adiós"));
+        assertTrue(wordParser.isWord("valid!"));
+        assertTrue(wordParser.isWord("logroño"));
+        assertTrue(wordParser.isWord("LOGROÑO"));
 
-	@Override
-	public void testIsWord() {
-		// Valid words
-		Assert.assertTrue(this.wordParser.isWord("hola"));
-		Assert.assertTrue(this.wordParser.isWord("test"));
-		Assert.assertTrue(this.wordParser.isWord("adiós"));
-		Assert.assertTrue(this.wordParser.isWord("valid!"));
-		Assert.assertTrue(this.wordParser.isWord("logroño"));
-		Assert.assertTrue(this.wordParser.isWord("LOGROÑO"));
+        // Invalid words
+        assertFalse(wordParser.isWord("25"));
+        assertFalse(wordParser.isWord("hola.adios"));
+        assertFalse(wordParser.isWord("ab23cd"));
+    }
 
-		// Invalid words
-		Assert.assertFalse(this.wordParser.isWord("25"));
-		Assert.assertFalse(this.wordParser.isWord("hola.adios"));
-		Assert.assertFalse(this.wordParser.isWord("ab23cd"));
-	}
+    @Override
+    public void testGetDefaultRhyme()
+    {
+        String rhyme0 = ((SpanishWordParser) wordParser).defaultRhymes.get(0);
+        String rhyme1 = ((SpanishWordParser) wordParser).defaultRhymes.get(1);
 
-	@Override
-	public void testPhoneticRhymePart() {
-		Assert.assertEquals(this.wordParser.phoneticRhymePart(""), "");
+        assertEquals(wordParser.getDefaultRhyme(), rhyme0);
+        assertEquals(wordParser.getDefaultRhyme(), rhyme1);
+        assertEquals(wordParser.getDefaultRhyme(), rhyme0);
+        assertEquals(wordParser.getDefaultRhyme(), rhyme1);
+    }
 
-		// Monosilabos
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("pez"), "ez");
-
-		// Agudas
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("correr"), "er");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("melón"), "on");
-
-		// Llanas
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("lío"), "io");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("carromato"),
-				"ato");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("Telecinco"),
-				"inco");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("abogado"), "ado");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("auriculares"),
-				"ares");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("canoa"), "oa");
-
-		// Esdrújulcas y sobreesdrújulas
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("cáspita"),
-				"aspita");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("recuérdamelo"),
-				"erdamelo");
-
-		// Casos foneticos especiales => sustitucion de consonantes
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("suyo"), "ullo");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("barullo"),
-				"ullo");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("barba"), "arva");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("parva"), "arva");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("gong"), "ong");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("falange"),
-				"anje");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("alfanje"),
-				"anje");
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("cacho"), "acho");
-
-		// Palabra imposible pero caso contemplado
-		Assert.assertEquals(this.wordParser.phoneticRhymePart("gargáreha"),
-				"area");
-	}
-
-	@Override
-	public void testRhyme() {
-		// Rhymes withoud punctuation
-		Assert.assertTrue(this.wordParser.rhyme("", ""));
-		Assert.assertTrue(this.wordParser.rhyme("pez", "hez"));
-		Assert.assertTrue(this.wordParser.rhyme("tres", "revés"));
-		Assert.assertTrue(this.wordParser.rhyme("Telecinco", "hinco"));
-		Assert.assertTrue(this.wordParser.rhyme("nabo", "centavo"));
-		Assert.assertTrue(this.wordParser.rhyme("falange", "alfanje"));
-		Assert.assertTrue(this.wordParser.rhyme("parva", "escarba"));
-		Assert.assertTrue(this.wordParser.rhyme("tuyo", "murmullo"));
-
-		// Rhymes with punctuation
-		Assert.assertTrue(this.wordParser.rhyme("cantar.", "pescar"));
-		Assert.assertTrue(this.wordParser.rhyme("calor!", "motor?"));
-		Assert.assertTrue(this.wordParser.rhyme("calor  ", "motor&;'?="));
-	}
-
-	@Override
-	public void testStressType() {
-		Assert.assertEquals(this.wordParser.stressType("pez"), StressType.LAST);
-		Assert.assertEquals(this.wordParser.stressType("correr"),
-				StressType.LAST);
-		Assert.assertEquals(this.wordParser.stressType("lío"),
-				StressType.SECOND_LAST);
-		Assert.assertEquals(this.wordParser.stressType("carromato"),
-				StressType.SECOND_LAST);
-		Assert.assertEquals(this.wordParser.stressType("cáspita"),
-				StressType.THIRD_LAST);
-		Assert.assertEquals(this.wordParser.stressType("recuérdamelo"),
-				StressType.FOURTH_LAST);
-	}
+    @Override
+    public void testIsNumber()
+    {String number = String.valueOf(new Random().nextInt());
+		assertTrue(wordParser.isNumber(number), number);
+		assertFalse(wordParser.isNumber(String.valueOf("No number")));
+    }
 
 }

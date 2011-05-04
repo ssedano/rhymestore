@@ -23,6 +23,7 @@
 package com.rhymestore.lang;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.rhymestore.lang.SpanishWordParser.SpanishNumber;
@@ -33,6 +34,8 @@ import com.rhymestore.lang.SpanishWordParser.SpanishNumber;
  * @author Ignasi Barrera
  */
 public class WordUtils {
+    private static SpanishWordParser spanishWordParser;
+
 	/**
 	 * Capitalizes the given String.
 	 * 
@@ -63,6 +66,7 @@ public class WordUtils {
 
 		if (sentence != null) {
 			List<String> words = Arrays.asList(sentence.split(" "));
+	    Collections.reverse(words);
 
 			for (String word : words) {
 				if (WordUtils.isWord(word)) {
@@ -83,9 +87,21 @@ public class WordUtils {
 		return last;
 	}
 
+	private static SpanishWordParser getSpanishWordParser() {
+		if (WordUtils.spanishWordParser == null) {
+			WordUtils.spanishWordParser = (SpanishWordParser) WordParserFactory
+					.getWordParser();
+		}
+		return WordUtils.spanishWordParser;
+	}
+
 	public static boolean isNumber(String word) {
-		char[] letters = SpanishWordParser.removeTrailingPunctuation(word)
-				.toCharArray();
+		char[] letters = WordUtils.getSpanishWordParser()
+				.removeTrailingPunctuation(word).toCharArray();
+		if (word.startsWith("-"))
+		{
+			word = word.replace("-", "");
+		}
 		for (char c : letters) {
 			if (!Character.isDigit(c)) {
 				return false;
@@ -96,13 +112,14 @@ public class WordUtils {
 
 	public static boolean isWord(String word) {
 
-		char[] letters = SpanishWordParser.removeTrailingPunctuation(word)
-				.toCharArray();
+		char[] letters = WordUtils.getSpanishWordParser()
+				.removeTrailingPunctuation(word).toCharArray();
 		for (char c : letters) {
-			if (!SpanishWordParser.isLetter(c)) {
+			if (!WordUtils.getSpanishWordParser().isLetter(c)) {
 				return false;
 			}
 		}
 		return true;
 	}
+
 }

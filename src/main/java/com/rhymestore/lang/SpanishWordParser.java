@@ -23,6 +23,11 @@
 package com.rhymestore.lang;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.rhymestore.config.Configuration;
 
 /**
  * Parses words to identify the part that is used to conform a consonant rhyme.
@@ -33,7 +38,15 @@ import java.math.BigDecimal;
  */
 public class SpanishWordParser implements WordParser {
 
-	public static enum SpanishNumber {
+	/**
+	 * This enum provides a base sound.
+	 * 
+	 * @todo rest of multiples.
+	 * @author serafin.sedano
+	 * @version 0.1
+	 */
+	public static enum SpanishNumber
+	{
 		UNO("1", "uno"), DOS("2", "dos"), TRES("3", "tres"), CUATRO("4",
 				"cuatro"), CINCO("5", "cinco"), SEIS("6", "seis"), SIETE("7",
 				"siete"), OCHO("8", "ocho"), NUEVE("9", "nueve"), DIEZ("10",
@@ -46,9 +59,23 @@ public class SpanishWordParser implements WordParser {
 			return SpanishNumber.getBaseSound(String.valueOf(number));
 		}
 
+		public static String getBaseSound(BigDecimal number)
+		{
+			return SpanishNumber.getBaseSound(number.toPlainString());
+		}
+
 		public static String getBaseSound(String number) {
 			if ((number == null) || "".equals(number)) {
 				return null;
+			}
+			if (number.contains("-"))
+			{
+				number = number.replaceAll("-", "");
+			}
+			if (number.contains(",") || number.contains(","))
+			{
+				number = number.replaceAll(",", "");
+				number = number.replaceAll(".", "");
 			}
 			if (new BigDecimal(number).compareTo(BigDecimal
 					.valueOf(Long.MAX_VALUE)) > 0) {
@@ -119,6 +146,7 @@ public class SpanishWordParser implements WordParser {
 
 		}
 
+		@Deprecated
 		private static String getSound(String number, int idx) {
 			char[] digits = number.toCharArray();
 			String sound = null;
@@ -147,7 +175,7 @@ public class SpanishWordParser implements WordParser {
 		}
 
 		static private String handlingValue(String number) {
-			return number.substring(number.length(), number.length() - 7);
+			return number.substring(number.length() - 7, number.length());
 		}
 
 		private static String tenners(long n) {
@@ -210,7 +238,7 @@ public class SpanishWordParser implements WordParser {
 		char[] letters = word.toCharArray();
 		for (char letter : letters) {
 			if (SpanishWordParser.isVocal(letter)
-				outhWordParser.acento(letter)) {
+					&& SpanishWordParser.acento(letter)) {
 				return true;
 			}
 		}
@@ -260,37 +288,6 @@ public class SpanishWordParser implements WordParser {
 		}
 
 		return i == silabas.length - 3;
-	}
-
-	public static boolean isLetter(final char letter) {
-		boolean isLetter = (letter >= 97) && (letter <= 122); // a-z
-		isLetter = isLetter || ((letter >= 65) && (letter <= 90)); // A-Z
-
-		if (isLetter) {
-			return true;
-		}
-
-		// others: check extended ascii codes specific letters
-
-		switch (letter) {
-		case 193: // A con acento
-		case 201: // E con acento
-		case 205: // I con acento
-		case 209: // enye mayuscula
-		case 211: // O con acento
-		case 218: // U con acento
-		case 220: // U con dieresis
-		case 225: // a con acento
-		case 233: // e con acento
-		case 237: // i con acento
-		case 241: // enye minuscula
-		case 243: // o con acento
-		case 250: // u con acento
-		case 252: // u con dieresis
-			return true;
-		default:
-			return false;
-		}
 	}
 
 	private static final boolean isVocal(final char letter) {
@@ -345,44 +342,24 @@ public class SpanishWordParser implements WordParser {
 		return false;
 	}
 
-	public static void main(String args[]) {
-		String cien = "4000";
-		for (Integer i = 0; i < 100; i++) {
-			System.out.println(i
-					+ ": "
-					+ SpanishNumber.getBaseSound("9999999999999999999999"
-							+ i.toString()));
-		}
-		String loooong = "";
-		System.out.println(loooong.compareTo(String.valueOf(Long.MAX_VALUE)));
+	/** The default rhymes for the Spanish language. */
+	/* package */List<String> defaultRhymes;
 
-	}
+	/** The last used default rhyme. */
+	/* package */int lastUsedDefault = 0;
 
-	/**
-	 * Removes the trailing punctuation from the given string
-	 * 
-	 * @param str
-	 *            The String to parse.
-	 * @return The String without the trailing punctuation
-	 */
-	static String removeTrailingPunctuation(final String str) {
-		if (str.length() == 0) {
-			return str;
-		}
+	public SpanishWordParser() {
+		super();
 
-		char[] chars = str.toCharArray();
+		this.defaultRhymes = new ArrayList<String>();
 
-		int i = chars.length - 1;
-		while (i >= 0) {
-			if (SpanishWordParser.isLetter(chars[i])
-					|| Character.isDigit(chars[i])) {
-				break;
+		for (Object prop : Configuration.getConfiguration().keySet()) {
+			String propertyName = (String) prop;
+			if (propertyName.startsWith(Configuration.DEFAULT_RHYME_PROPERTY)) {
+				this.defaultRhymes.add(Configuration
+						.getConfigValue(propertyName));
 			}
-			i--;
 		}
-
-		// variable 'i' holds the last letter index
-		return str.substring(0, i + 1);
 	}
 
 	private boolean consonantes1(final char a, final char b) {
@@ -410,7 +387,8 @@ public class SpanishWordParser implements WordParser {
 
 	@Override
 	public String getDefaultRhyme() {
-		return SpanishWordParser.DEFAULT_RHYME;
+		return this.defaultRhymes.get(this.lastUsedDefault++
+				% this.defaultRhymes.size());
 	}
 
 	private boolean hiato(final char v, final char v2) { // Estable si hay
@@ -447,9 +425,44 @@ public class SpanishWordParser implements WordParser {
 	}
 
 	@Override
+	public boolean isLetter(final char letter) {
+		boolean isLetter = (letter >= 97) && (letter <= 122); // a-z
+		isLetter = isLetter || ((letter >= 65) && (letter <= 90)); // A-Z
+
+		if (isLetter) {
+			return true;
+		}
+
+		// others: check extended ascii codes specific letters
+
+		switch (letter) {
+		case 193: // A con acento
+		case 201: // E con acento
+		case 205: // I con acento
+		case 209: // enye mayuscula
+		case 211: // O con acento
+		case 218: // U con acento
+		case 220: // U con dieresis
+		case 225: // a con acento
+		case 233: // e con acento
+		case 237: // i con acento
+		case 241: // enye minuscula
+		case 243: // o con acento
+		case 250: // u con acento
+		case 252: // u con dieresis
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	@Override
 	public boolean isNumber(String word) {
-		char[] letters = SpanishWordParser.removeTrailingPunctuation(word)
-				.toCharArray();
+		char[] letters = this.removeTrailingPunctuation(word).toCharArray();
+		
+		if(word.startsWith("-")) {
+			word = word.replace("-", "");
+		}
 		for (char c : letters) {
 			if (!Character.isDigit(c)) {
 				return false;
@@ -460,15 +473,14 @@ public class SpanishWordParser implements WordParser {
 
 	@Override
 	public boolean isWord(final String text) {
-		char[] letters = SpanishWordParser.removeTrailingPunctuation(text)
-				.toCharArray();
+		char[] letters = this.removeTrailingPunctuation(text).toCharArray();
 
 		if (letters.length == 0) {
 			return false;
 		}
 
 		for (char letter : letters) {
-			if (!SpanishWordParser.isLetter(letter)) {
+			if (!this.isLetter(letter)) {
 				return false;
 			}
 		}
@@ -528,8 +540,7 @@ public class SpanishWordParser implements WordParser {
 
 	@Override
 	public String phoneticRhymePart(final String word) {
-		String withoutPunctuation = SpanishWordParser
-				.removeTrailingPunctuation(word);
+		String withoutPunctuation = this.removeTrailingPunctuation(word);
 		String rhymePart = this.rhymePart(withoutPunctuation);
 
 		StringBuilder result = new StringBuilder();
@@ -592,6 +603,32 @@ public class SpanishWordParser implements WordParser {
 		return result.toString();
 	}
 
+	/**
+	 * Removes the trailing punctuation from the given string
+	 * 
+	 * @param str
+	 *            The String to parse.
+	 * @return The String without the trailing punctuation
+	 */
+	public String removeTrailingPunctuation(final String str) {
+		if (str.length() == 0) {
+			return str;
+		}
+
+		char[] chars = str.toCharArray();
+
+		int i = chars.length - 1;
+		while (i >= 0) {
+			if (this.isLetter(chars[i]) || Character.isDigit(chars[i])) {
+				break;
+			}
+			i--;
+		}
+
+		// variable 'i' holds the last letter index
+		return str.substring(0, i + 1);
+	}
+
 	@Override
 	public boolean rhyme(final String word1, final String word2) {
 		String rhyme1 = this.phoneticRhymePart(word1);
@@ -600,7 +637,7 @@ public class SpanishWordParser implements WordParser {
 		return rhyme1.equalsIgnoreCase(rhyme2);
 	}
 
-	private String rhymePart(String word) {
+	private String rhymePart(final String word) {
 		if (word.length() == 0) {
 			return "";
 		}
@@ -799,8 +836,7 @@ public class SpanishWordParser implements WordParser {
 
 	@Override
 	public StressType stressType(final String word) {
-		String[] silabas = this.silabas(SpanishWordParser
-				.removeTrailingPunctuation(word));
+		String[] silabas = this.silabas(this.removeTrailingPunctuation(word));
 
 		if (silabas.length == 1) {
 			return StressType.LAST;
