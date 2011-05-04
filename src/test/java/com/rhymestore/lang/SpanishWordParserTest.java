@@ -184,6 +184,7 @@ public class SpanishWordParserTest extends AbstractWordParserTest
         assertEquals(wordParser.getDefaultRhyme(), rhyme1);
         assertEquals(wordParser.getDefaultRhyme(), rhyme0);
         assertEquals(wordParser.getDefaultRhyme(), rhyme1);
+<<<<<<< HEAD
     }
 
     @Override
@@ -191,6 +192,8 @@ public class SpanishWordParserTest extends AbstractWordParserTest
     {String number = String.valueOf(new Random().nextInt());
 		assertTrue(wordParser.isNumber(number), number);
 		assertFalse(wordParser.isNumber(String.valueOf("No number")));
+=======
+>>>>>>> master
     }
 
 }
