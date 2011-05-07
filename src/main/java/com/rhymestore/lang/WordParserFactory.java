@@ -36,47 +36,53 @@ import com.rhymestore.config.ConfigurationException;
  */
 public class WordParserFactory
 {
-    /** The logger. */
-    private static final Logger LOGGER = LoggerFactory.getLogger(WordParserFactory.class);
+	/** The logger. */
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(WordParserFactory.class);
 
-    /** The {@link WordParser} used in the application. */
-    private static WordParser wordParser;
+	/** The {@link WordParser} used in the application. */
+	private static WordParser wordParser;
 
-    /**
-     * Gets the {@link WordParser} to be used in the application.
-     * 
-     * @return The <code>WordParser</code> to be used in the application.
-     * @throws ConfigurationException If the <code>WordParser</code> cannot be created.
-     */
-    @SuppressWarnings("unchecked")
-    public static WordParser getWordParser() throws ConfigurationException
-    {
-        if (wordParser == null)
-        {
-            String className = Configuration.getConfigValue(Configuration.WORDPARSER_PROPERTY);
+	/**
+	 * Gets the {@link WordParser} to be used in the application.
+	 * 
+	 * @return The <code>WordParser</code> to be used in the application.
+	 * @throws ConfigurationException If the <code>WordParser</code> cannot be
+	 *             created.
+	 */
+	@SuppressWarnings("unchecked")
+	public static WordParser getWordParser() throws ConfigurationException
+	{
+		if (wordParser == null)
+		{
+			String className = Configuration
+					.getConfigValue(Configuration.WORDPARSER_PROPERTY);
 
-            if (className == null)
-            {
-                throw new ConfigurationException(Configuration.WORDPARSER_PROPERTY
-                    + " property not defined");
-            }
+			if (className == null)
+			{
+				throw new ConfigurationException(
+						Configuration.WORDPARSER_PROPERTY
+								+ " property not defined");
+			}
 
-            LOGGER.info("Using WordParser: {}", className);
+			LOGGER.info("Using WordParser: {}", className);
 
-            try
-            {
-                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-                Class< ? extends WordParser> clazz =
-                    (Class< ? extends WordParser>) Class.forName(className, true, classLoader);
-                wordParser = clazz.newInstance();
-            }
-            catch (Exception ex)
-            {
-                throw new ConfigurationException("Could not create the WordParser of class: "
-                    + className, ex);
-            }
-        }
+			try
+			{
+				ClassLoader classLoader = Thread.currentThread()
+						.getContextClassLoader();
+				Class<? extends WordParser> clazz = (Class<? extends WordParser>) Class
+						.forName(className, true, classLoader);
+				wordParser = clazz.newInstance();
+			}
+			catch (Exception ex)
+			{
+				throw new ConfigurationException(
+						"Could not create the WordParser of class: "
+								+ className, ex);
+			}
+		}
 
-        return wordParser;
-    }
+		return wordParser;
+	}
 }

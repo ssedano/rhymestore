@@ -38,16 +38,16 @@ import twitter4j.auth.RequestToken;
  * @see Twitter
  * @see OAuthAuthorization
  */
-public class AccessTokenGenerator {
+public class AccessTokenGenerator
+{
 	/**
 	 * Interactive {@link AccessToken} generation.
 	 * 
-	 * @param args
-	 *            No args are required.
-	 * @throws Exception
-	 *             If the token cannot be generated.
+	 * @param args No args are required.
+	 * @throws Exception If the token cannot be generated.
 	 */
-	public static void main(final String... args) throws Exception {
+	public static void main(final String... args) throws Exception
+	{
 		Twitter twitter = new TwitterFactory().getInstance();
 		String key = "KenJwsBvWiohqH8WvWUw";
 		String l = "KtGreMkLRKG0pOBoS3AelZjB6Issf568MoicukSbvPM";

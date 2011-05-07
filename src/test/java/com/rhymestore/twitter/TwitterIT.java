@@ -36,7 +36,8 @@ import twitter4j.User;
  * 
  * @author Ignasi Barrera
  */
-public class TwitterIT {
+public class TwitterIT
+{
 	/** The twitter user name. */
 	private static final String TWITTER_USER_NAME = "telorimo";
 
@@ -44,17 +45,20 @@ public class TwitterIT {
 	private Twitter twitter;
 
 	@BeforeMethod
-	public void setUp() {
+	public void setUp()
+	{
 		this.twitter = new TwitterFactory().getInstance();
 	}
 
 	@AfterMethod
-	public void tearDown() {
+	public void tearDown()
+	{
 		this.twitter.shutdown();
 	}
 
 	@Test
-	public void testTwitterConnect() throws Exception {
+	public void testTwitterConnect() throws Exception
+	{
 		User user = this.twitter.verifyCredentials();
 		Assert.assertEquals(TwitterIT.TWITTER_USER_NAME, user.getScreenName());
 	}

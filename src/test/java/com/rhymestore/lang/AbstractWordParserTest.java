@@ -33,7 +33,8 @@ import org.testng.annotations.Test;
  * 
  * @author Ignasi Barrera
  */
-public abstract class AbstractWordParserTest {
+public abstract class AbstractWordParserTest
+{
 	/** The word parser. */
 	protected WordParser wordParser;
 
@@ -45,19 +46,21 @@ public abstract class AbstractWordParserTest {
 	protected abstract WordParser getWordParser();
 
 	@BeforeMethod
-	public void setUp() {
+	public void setUp()
+	{
 		this.wordParser = this.getWordParser();
 	}
 
 	// Common tests
 
 	@Test
-	public void testCapitalize() {
+	public void testCapitalize()
+	{
 		Assert.assertEquals(WordUtils.capitalize(""), "");
 		Assert.assertEquals(WordUtils.capitalize("a"), "A");
 		Assert.assertEquals(WordUtils.capitalize("word"), "Word");
 		Assert.assertEquals(WordUtils.capitalize("capitalize test"),
-		"Capitalize test");
+				"Capitalize test");
 	}
 
 	/**
@@ -69,7 +72,8 @@ public abstract class AbstractWordParserTest {
 	// Tests to be implemented by each WordParser implementation tests
 
 	@Test
-	public void testGetLastWord() {
+	public void testGetLastWord()
+	{
 		Assert.assertEquals(WordUtils.getLastWord(""), "");
 		Assert.assertEquals(WordUtils.getLastWord("test"), "test");
 		Assert.assertEquals(WordUtils.getLastWord("two words"), "words");

@@ -27,7 +27,8 @@ package com.rhymestore.lang;
  * 
  * @author Ignasi Barrera
  */
-public interface WordParser {
+public interface WordParser
+{
 	/**
 	 * Gets the default rhyme.
 	 * 
@@ -38,8 +39,7 @@ public interface WordParser {
 	/**
 	 * Checks if the specified character is a valid letter.
 	 * 
-	 * @param letter
-	 *            The character to check.
+	 * @param letter The character to check.
 	 * @return Boolean indicating if the specified character is a valid letter.
 	 */
 	public boolean isLetter(final char letter);
@@ -47,8 +47,7 @@ public interface WordParser {
 	/**
 	 * Checks if the text is a Number.
 	 * 
-	 * @param text
-	 *            the text to eval.
+	 * @param text the text to eval.
 	 * @return true if it is a number, false otherwise.
 	 */
 	public boolean isNumber(String text);
@@ -56,8 +55,7 @@ public interface WordParser {
 	/**
 	 * Checks if the specified text is a valid word.
 	 * 
-	 * @param text
-	 *            The text to check.
+	 * @param text The text to check.
 	 * @return Boolean indicating if the specified text is a valid word.
 	 */
 	public boolean isWord(final String text);
@@ -65,8 +63,7 @@ public interface WordParser {
 	/**
 	 * Gets the part of the word that is used to create the rhyme.
 	 * 
-	 * @param word
-	 *            The word.
+	 * @param word The word.
 	 * @return The part of the word that is used to create the rhyme.
 	 */
 	public String phoneticRhymePart(final String word);
@@ -74,10 +71,8 @@ public interface WordParser {
 	/**
 	 * Checks if the given words rhyme between them.
 	 * 
-	 * @param word1
-	 *            The first word.
-	 * @param word2
-	 *            The second word.
+	 * @param word1 The first word.
+	 * @param word2 The second word.
 	 * @return Boolean indicating if the given words rhyme between them.
 	 */
 	public boolean rhyme(String word1, String word2);
@@ -85,8 +80,7 @@ public interface WordParser {
 	/**
 	 * Gets the {@link StressType} of the word based on the syllables.
 	 * 
-	 * @param word
-	 *            The word.
+	 * @param word The word.
 	 * @return The <code>StressType</code>.
 	 */
 	public StressType stressType(final String word);

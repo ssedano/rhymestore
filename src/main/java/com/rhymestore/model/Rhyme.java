@@ -38,37 +38,37 @@ import com.rhymestore.twitter.util.TwitterUtils;
  */
 public class Rhyme implements Serializable
 {
-    /** Serial UID. */
-    private static final long serialVersionUID = 1L;
+	/** Serial UID. */
+	private static final long serialVersionUID = 1L;
 
-    private Long id;
+	private Long id;
 
-    /** The text of the rhyme to add/delete. */
-    @NotNull(message = "rhyme text must not be null")
-    @Length(min = 1, max = TwitterUtils.MAX_TWEET_LENGTH)
-    @ValidWord
-    private String rhyme;
+	/** The text of the rhyme to add/delete. */
+	@NotNull(message = "rhyme text must not be null")
+	@Length(min = 1, max = TwitterUtils.MAX_TWEET_LENGTH)
+	@ValidWord
+	private String rhyme;
 
-    // Getters and setters
+	// Getters and setters
 
-    public Long getId()
-    {
-        return id;
-    }
+	public Long getId()
+	{
+		return id;
+	}
 
-    public void setId(Long id)
-    {
-        this.id = id;
-    }
+	public void setId(Long id)
+	{
+		this.id = id;
+	}
 
-    public String getRhyme()
-    {
-        return rhyme;
-    }
+	public String getRhyme()
+	{
+		return rhyme;
+	}
 
-    public void setRhyme(String rhyme)
-    {
-        this.rhyme = rhyme;
-    }
+	public void setRhyme(String rhyme)
+	{
+		this.rhyme = rhyme;
+	}
 
 }

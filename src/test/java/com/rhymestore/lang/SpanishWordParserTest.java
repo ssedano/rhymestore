@@ -90,7 +90,7 @@ public class SpanishWordParserTest extends AbstractWordParserTest
 		assertEquals(wordParser.stressType("carromato"), StressType.SECOND_LAST);
 		assertEquals(wordParser.stressType("cáspita"), StressType.THIRD_LAST);
 		assertEquals(wordParser.stressType("recuérdamelo"),
-		        StressType.FOURTH_LAST);
+				StressType.FOURTH_LAST);
 	}
 
 	@Override
@@ -113,11 +113,11 @@ public class SpanishWordParserTest extends AbstractWordParserTest
 
 		// TODO one rhyme with every number (sound).Rhymes with numbers
 		assertTrue(wordParser.rhyme(
-		        SpanishWordParser.SpanishNumber.getBaseSound(1L), "tuno"));
+				SpanishWordParser.SpanishNumber.getBaseSound(1L), "tuno"));
 		assertTrue(wordParser.rhyme(
-		        SpanishWordParser.SpanishNumber.getBaseSound("88.88"), "cocho"));
+				SpanishWordParser.SpanishNumber.getBaseSound("88.88"), "cocho"));
 		assertTrue(wordParser.rhyme(
-		        SpanishWordParser.SpanishNumber.getBaseSound("88,88"), "cocho"));
+				SpanishWordParser.SpanishNumber.getBaseSound("88,88"), "cocho"));
 	}
 
 	@Override
@@ -197,6 +197,7 @@ public class SpanishWordParserTest extends AbstractWordParserTest
 		assertTrue(wordParser.isNumber(number), number);
 		assertFalse(wordParser.isNumber(String.valueOf("No number")));
 	}
+
 	@Test
 	public void testSpanishNumber()
 	{
@@ -214,7 +215,8 @@ public class SpanishWordParserTest extends AbstractWordParserTest
 		assertEquals("once", SpanishWordParser.SpanishNumber.getBaseSound(11));
 		assertEquals("doce", SpanishWordParser.SpanishNumber.getBaseSound(12));
 		assertEquals("trece", SpanishWordParser.SpanishNumber.getBaseSound(13));
-		assertEquals("catorce", SpanishWordParser.SpanishNumber.getBaseSound(14));
+		assertEquals("catorce",
+				SpanishWordParser.SpanishNumber.getBaseSound(14));
 		assertEquals("quince", SpanishWordParser.SpanishNumber.getBaseSound(15));
 		assertEquals("seis", SpanishWordParser.SpanishNumber.getBaseSound(16));
 		assertEquals("siete", SpanishWordParser.SpanishNumber.getBaseSound(17));
@@ -301,14 +303,22 @@ public class SpanishWordParserTest extends AbstractWordParserTest
 		assertEquals("ocho", SpanishWordParser.SpanishNumber.getBaseSound(98));
 		assertEquals("nueve", SpanishWordParser.SpanishNumber.getBaseSound(99));
 		assertEquals("cien", SpanishWordParser.SpanishNumber.getBaseSound(100));
-		assertEquals("cientos", SpanishWordParser.SpanishNumber.getBaseSound(200));
-		assertEquals("cientos", SpanishWordParser.SpanishNumber.getBaseSound(300));
-		assertEquals("cientos", SpanishWordParser.SpanishNumber.getBaseSound(400));
-		assertEquals("cientos", SpanishWordParser.SpanishNumber.getBaseSound(500));
-		assertEquals("cientos", SpanishWordParser.SpanishNumber.getBaseSound(600));
-		assertEquals("cientos", SpanishWordParser.SpanishNumber.getBaseSound(700));
-		assertEquals("cientos", SpanishWordParser.SpanishNumber.getBaseSound(800));
-		assertEquals("cientos", SpanishWordParser.SpanishNumber.getBaseSound(900));
+		assertEquals("cientos",
+				SpanishWordParser.SpanishNumber.getBaseSound(200));
+		assertEquals("cientos",
+				SpanishWordParser.SpanishNumber.getBaseSound(300));
+		assertEquals("cientos",
+				SpanishWordParser.SpanishNumber.getBaseSound(400));
+		assertEquals("cientos",
+				SpanishWordParser.SpanishNumber.getBaseSound(500));
+		assertEquals("cientos",
+				SpanishWordParser.SpanishNumber.getBaseSound(600));
+		assertEquals("cientos",
+				SpanishWordParser.SpanishNumber.getBaseSound(700));
+		assertEquals("cientos",
+				SpanishWordParser.SpanishNumber.getBaseSound(800));
+		assertEquals("cientos",
+				SpanishWordParser.SpanishNumber.getBaseSound(900));
 		assertEquals("mil", SpanishWordParser.SpanishNumber.getBaseSound(1000));
 		assertEquals("mil", SpanishWordParser.SpanishNumber.getBaseSound(2000));
 		assertEquals("mil", SpanishWordParser.SpanishNumber.getBaseSound(3000));

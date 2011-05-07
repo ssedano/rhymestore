@@ -28,18 +28,19 @@ import javax.servlet.http.HttpServletResponse;
 import org.sjmvc.controller.MethodInvokingController;
 
 /**
- * Controller that delegates the execution depending on the HTTP method used in the request.
+ * Controller that delegates the execution depending on the HTTP method used in
+ * the request.
  * 
  * @author Ignasi Barrera
  */
 public class HttpMethodController extends MethodInvokingController
 {
-    @Override
-    public void doExecute(HttpServletRequest request, HttpServletResponse response)
-        throws Exception
-    {
-        // Extract the method name from the HTTP request method
-        doInvoke(request.getMethod().toLowerCase(), request, response);
-    }
+	@Override
+	public void doExecute(HttpServletRequest request,
+			HttpServletResponse response) throws Exception
+	{
+		// Extract the method name from the HTTP request method
+		doInvoke(request.getMethod().toLowerCase(), request, response);
+	}
 
 }

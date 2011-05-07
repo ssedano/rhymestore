@@ -44,7 +44,8 @@ import com.rhymestore.twitter.util.TwitterUtils;
  * @see Twitter
  * @see TwitterScheduler
  */
-public class ReplyCommand implements TwitterCommand {
+public class ReplyCommand implements TwitterCommand
+{
 	/** The logger. */
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(ReplyCommand.class);
@@ -61,13 +62,12 @@ public class ReplyCommand implements TwitterCommand {
 	/**
 	 * Creates a new {@link ReplyCommand} for the given status.
 	 * 
-	 * @param status
-	 *            The status to reply.
-	 * @param commandQueue
-	 *            The queue with the pending commands.
+	 * @param status The status to reply.
+	 * @param commandQueue The queue with the pending commands.
 	 */
 	public ReplyCommand(final Status status,
-			final Queue<TwitterCommand> commandQueue) {
+			final Queue<TwitterCommand> commandQueue)
+	{
 		super();
 		this.status = status;
 		this.commandQueue = commandQueue;
@@ -82,25 +82,31 @@ public class ReplyCommand implements TwitterCommand {
 	 * @see com.rhymestore.twitter.commands.TwitterCommand#execute(twitter4j.Twitter)
 	 */
 	@Override
-	public void execute(final Twitter twitter) throws TwitterException {
+	public void execute(final Twitter twitter) throws TwitterException
+	{
 		String rhyme = null;
 
-		try {
+		try
+		{
 			rhyme = this.rhymeStore.getRhyme(this.status.getText());
 			// No rhyme Exception flux
-			if ("Patada en los cojones".equalsIgnoreCase(rhyme)) {
+			if ("Patada en los cojones".equalsIgnoreCase(rhyme))
+			{
 				// rhyme the name!
 				ReplyCommand.LOGGER.debug("with the name");
 				rhyme = this.rhymeStore.getRhyme(this.status.getUser()
 						.getScreenName());
 			}
-		} catch (IOException ex) {
+		}
+		catch (IOException ex)
+		{
 			ReplyCommand.LOGGER
 					.error("An error occured while connecting to the rhyme store. Could not reply to {}",
 							this.status.getUser().getScreenName(), ex);
 		}
 
-		try {
+		try
+		{
 			String tweet = TwitterUtils.reply(this.status.getUser()
 					.getScreenName(), rhyme);
 
@@ -111,13 +117,16 @@ public class ReplyCommand implements TwitterCommand {
 			StatusUpdate newStatus = new StatusUpdate(tweet);
 			newStatus.setInReplyToStatusId(this.status.getId());
 			twitter.updateStatus(newStatus);
-		} catch (TwitterException ex) {
+		}
+		catch (TwitterException ex)
+		{
 			ReplyCommand.LOGGER.error("Could not send reply to tweet "
 					+ this.status.getId(), ex);
 
 			// If it is not a duplicate tweet, enqueue the API call again, to
 			// retry it later
-			if (!TwitterUtils.isDuplicateTweetError(ex)) {
+			if (!TwitterUtils.isDuplicateTweetError(ex))
+			{
 				ReplyCommand.LOGGER
 						.debug("Enqueuing the reply to try again later...");
 

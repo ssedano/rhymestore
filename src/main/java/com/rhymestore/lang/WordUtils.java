@@ -33,17 +33,18 @@ import com.rhymestore.lang.SpanishWordParser.SpanishNumber;
  * 
  * @author Ignasi Barrera
  */
-public class WordUtils {
-    private static SpanishWordParser spanishWordParser;
+public class WordUtils
+{
+	private static SpanishWordParser spanishWordParser;
 
 	/**
 	 * Capitalizes the given String.
 	 * 
-	 * @param str
-	 *            The String to capitalize.
+	 * @param str The String to capitalize.
 	 * @return The capitalized String.
 	 */
-	public static String capitalize(final String str) {
+	public static String capitalize(final String str)
+	{
 		switch (str.length()) {
 		case 0:
 			return str;
@@ -57,26 +58,31 @@ public class WordUtils {
 	/**
 	 * Gets the last word of the given sentence.
 	 * 
-	 * @param sentence
-	 *            The sentence to parse.
+	 * @param sentence The sentence to parse.
 	 * @return The last word of the given sentence.
 	 */
-	public static String getLastWord(final String sentence) {
+	public static String getLastWord(final String sentence)
+	{
 		String last = null;
 
-		if (sentence != null) {
+		if (sentence != null)
+		{
 			List<String> words = Arrays.asList(sentence.split(" "));
-	    Collections.reverse(words);
+			Collections.reverse(words);
 
-			for (String word : words) {
-				if (WordUtils.isWord(word)) {
+			for (String word : words)
+			{
+				if (WordUtils.isWord(word))
+				{
 					last = word;
 					break;
 				}
-				if (WordUtils.isNumber(word)) {
+				if (WordUtils.isNumber(word))
+				{
 					String sound = SpanishNumber.getBaseSound(word);
 
-					if (sound != null) {
+					if (sound != null)
+					{
 
 						last = sound;// ()
 						break;
@@ -87,35 +93,43 @@ public class WordUtils {
 		return last;
 	}
 
-	private static SpanishWordParser getSpanishWordParser() {
-		if (WordUtils.spanishWordParser == null) {
+	private static SpanishWordParser getSpanishWordParser()
+	{
+		if (WordUtils.spanishWordParser == null)
+		{
 			WordUtils.spanishWordParser = (SpanishWordParser) WordParserFactory
 					.getWordParser();
 		}
 		return WordUtils.spanishWordParser;
 	}
 
-	public static boolean isNumber(String word) {
+	public static boolean isNumber(String word)
+	{
 		char[] letters = WordUtils.getSpanishWordParser()
 				.removeTrailingPunctuation(word).toCharArray();
 		if (word.startsWith("-"))
 		{
 			word = word.replace("-", "");
 		}
-		for (char c : letters) {
-			if (!Character.isDigit(c)) {
+		for (char c : letters)
+		{
+			if (!Character.isDigit(c))
+			{
 				return false;
 			}
 		}
 		return true;
 	}
 
-	public static boolean isWord(String word) {
+	public static boolean isWord(String word)
+	{
 
 		char[] letters = WordUtils.getSpanishWordParser()
 				.removeTrailingPunctuation(word).toCharArray();
-		for (char c : letters) {
-			if (!WordUtils.getSpanishWordParser().isLetter(c)) {
+		for (char c : letters)
+		{
+			if (!WordUtils.getSpanishWordParser().isLetter(c))
+			{
 				return false;
 			}
 		}

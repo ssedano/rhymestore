@@ -54,7 +54,8 @@ import com.rhymestore.lang.WordUtils;
  * @see Jedis
  * @see WordParser
  */
-public class RhymeStore {
+public class RhymeStore
+{
 	/** The logger. */
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(RhymeStore.class);
@@ -79,8 +80,10 @@ public class RhymeStore {
 	 * 
 	 * @return The singleton instance of the store.
 	 */
-	public static RhymeStore getInstance() {
-		if (RhymeStore.instance == null) {
+	public static RhymeStore getInstance()
+	{
+		if (RhymeStore.instance == null)
+		{
 			RhymeStore.instance = new RhymeStore();
 		}
 
@@ -97,7 +100,8 @@ public class RhymeStore {
 	 * Creates a new <code>RhymeStore</code> connecting to
 	 * <code>localhost</code> and the default Redis port.
 	 */
-	protected RhymeStore() {
+	protected RhymeStore()
+	{
 		String host = Configuration
 				.getConfigValue(Configuration.REDIS_HOST_PROPERTY);
 		String port = Configuration
@@ -111,15 +115,15 @@ public class RhymeStore {
 	/**
 	 * Adds the given rhyme to the Redis database.
 	 * 
-	 * @param sentence
-	 *            The rhyme to add.
-	 * @throws IOException
-	 *             If an error occurs while adding the rhyme.
+	 * @param sentence The rhyme to add.
+	 * @throws IOException If an error occurs while adding the rhyme.
 	 */
-	public void add(final String sentence) throws IOException {
+	public void add(final String sentence) throws IOException
+	{
 		String word = WordUtils.getLastWord(sentence);
 
-		if (word.isEmpty()) {
+		if (word.isEmpty())
+		{
 			return;
 		}
 
@@ -135,7 +139,8 @@ public class RhymeStore {
 				this.normalizeString(sentence));
 		sentenceId = this.sentencens.build(sentenceId).toString();
 
-		if (this.redis.exists(sentenceId) == 1) {
+		if (this.redis.exists(sentenceId) == 1)
+		{
 			this.disconnect();
 			return;
 		}
@@ -155,20 +160,21 @@ public class RhymeStore {
 		RhymeStore.LOGGER.info("Added rhyme: {}", sentence);
 	}
 
-	protected String buildUniqueToken(final String rhyme, final StressType type) {
+	protected String buildUniqueToken(final String rhyme, final StressType type)
+	{
 		return this.sum(type.name().concat(rhyme));
 	}
 
 	/**
 	 * Connects to the Redis database.
 	 * 
-	 * @throws UnknownHostException
-	 *             If the target host does not respond.
-	 * @throws IOException
-	 *             If an error occurs while connecting.
+	 * @throws UnknownHostException If the target host does not respond.
+	 * @throws IOException If an error occurs while connecting.
 	 */
-	protected void connect() throws UnknownHostException, IOException {
-		if (!this.redis.isConnected()) {
+	protected void connect() throws UnknownHostException, IOException
+	{
+		if (!this.redis.isConnected())
+		{
 			this.redis.connect();
 		}
 	}
@@ -176,12 +182,11 @@ public class RhymeStore {
 	/**
 	 * Deletes the given rhyme from the Redis database.
 	 * 
-	 * @param sentence
-	 *            The rhyme to delete.
-	 * @throws IOException
-	 *             If an error occurs while deleting the rhyme.
+	 * @param sentence The rhyme to delete.
+	 * @throws IOException If an error occurs while deleting the rhyme.
 	 */
-	public void delete(final String sentence) throws IOException {
+	public void delete(final String sentence) throws IOException
+	{
 		throw new UnsupportedOperationException(
 				"Delete operation is not implemented yet.");
 	}
@@ -189,11 +194,12 @@ public class RhymeStore {
 	/**
 	 * Disconnects from the Redis database.
 	 * 
-	 * @throws IOException
-	 *             If an error occurs while disconnecting.
+	 * @throws IOException If an error occurs while disconnecting.
 	 */
-	protected void disconnect() throws IOException {
-		if (this.redis.isConnected()) {
+	protected void disconnect() throws IOException
+	{
+		if (this.redis.isConnected())
+		{
 			this.redis.disconnect();
 		}
 	}
@@ -202,23 +208,26 @@ public class RhymeStore {
 	 * Gets all the stored rhymes.
 	 * 
 	 * @return A <code>Set</code> with all the stored rhymes.
-	 * @throws IOException
-	 *             If the rhymes cannot be obtained.
+	 * @throws IOException If the rhymes cannot be obtained.
 	 */
-	public Set<String> findAll() throws IOException {
+	public Set<String> findAll() throws IOException
+	{
 		Set<String> rhymes = new HashSet<String>();
 
 		this.connect();
 
 		String lastId = this.getLastId(this.sentencens);
 
-		if (lastId != null) {
+		if (lastId != null)
+		{
 			Integer n = Integer.parseInt(this.getLastId(this.sentencens));
 
-			for (int i = 1; i <= n; i++) {
+			for (int i = 1; i <= n; i++)
+			{
 				String id = this.sentencens.build(String.valueOf(i)).toString();
 
-				if (this.redis.exists(id) == 1) {
+				if (this.redis.exists(id) == 1)
+				{
 					rhymes.add(URLDecoder.decode(this.redis.get(id),
 							this.encoding));
 				}
@@ -230,18 +239,19 @@ public class RhymeStore {
 		return rhymes;
 	}
 
-	protected String getLastId(final Keymaker ns) {
+	protected String getLastId(final Keymaker ns)
+	{
 		return this.redis.get(ns.build("next.id").toString());
 	}
 
 	/**
 	 * Gets a rhyme for the given sentence.
 	 * 
-	 * @param sentence
-	 *            The sentence to rhyme.
+	 * @param sentence The sentence to rhyme.
 	 * @return The rhyme.
 	 */
-	public String getRhyme(final String sentence) throws IOException {
+	public String getRhyme(final String sentence) throws IOException
+	{
 		String lastWord = WordUtils.getLastWord(sentence);
 
 		String rhymepart = this.wordParser.phoneticRhymePart(lastWord);
@@ -255,10 +265,13 @@ public class RhymeStore {
 
 		this.disconnect();
 
-		if (rhymes.isEmpty()) {
+		if (rhymes.isEmpty())
+		{
 			// If no rhyme is found, return the default rhyme
 			return this.wordParser.getDefaultRhyme();
-		} else {
+		}
+		else
+		{
 			// Otherwise, return a random rhyme
 			List<String> rhymeList = new ArrayList<String>(rhymes);
 
@@ -269,30 +282,35 @@ public class RhymeStore {
 		}
 	}
 
-	protected String getUniqueId(final Keymaker ns, final String token) {
+	protected String getUniqueId(final Keymaker ns, final String token)
+	{
 		String key = this.getUniqueIdKey(ns, token);
 		String id = this.redis.get(key);
 
-		if (id != null) {
+		if (id != null)
+		{
 			return id;
 		}
 
 		Integer next = this.redis.incr(ns.build("next.id").toString());
 		id = next.toString();
 
-		if (this.redis.setnx(key, id) == 0) {
+		if (this.redis.setnx(key, id) == 0)
+		{
 			id = this.redis.get(key);
 		}
 
 		return id;
 	}
 
-	protected String getUniqueIdKey(final Keymaker ns, final String token) {
+	protected String getUniqueIdKey(final Keymaker ns, final String token)
+	{
 		String md = this.sum(token);
 		return ns.build(md, "id").toString();
 	}
 
-	protected String normalizeString(final String value) {
+	protected String normalizeString(final String value)
+	{
 		// To lower case
 		String token = value.toLowerCase();
 
@@ -309,29 +327,31 @@ public class RhymeStore {
 	/**
 	 * Search for rhymes for the given sentence.
 	 * 
-	 * @param rhyme
-	 *            The rhyme to search.
-	 * @param type
-	 *            The <code>StressType</code> of the rhyme to search.
+	 * @param rhyme The rhyme to search.
+	 * @param type The <code>StressType</code> of the rhyme to search.
 	 * @return A <code>Set</code> of rhymes for the given sentence.
-	 * @throws IOException
-	 *             If an error occurs while searching for the rhymes.
+	 * @throws IOException If an error occurs while searching for the rhymes.
 	 */
 	protected Set<String> search(final String rhyme, final StressType type)
-			throws IOException {
+			throws IOException
+	{
 		Set<String> rhymes = new HashSet<String>();
 		String norm = this.normalizeString(rhyme);
 
 		String uniqueId = this.getUniqueIdKey(this.indexns,
 				this.buildUniqueToken(norm, type));
 
-		if (this.redis.exists(uniqueId) == 1) {
+		if (this.redis.exists(uniqueId) == 1)
+		{
 			String indexId = this.redis.get(uniqueId);
 			indexId = this.indexns.build(indexId).toString();
 
-			if (this.redis.exists(indexId) == 1) {
-				for (String id : this.redis.smembers(indexId)) {
-					if (this.redis.exists(id) == 1) {
+			if (this.redis.exists(indexId) == 1)
+			{
+				for (String id : this.redis.smembers(indexId))
+				{
+					if (this.redis.exists(id) == 1)
+					{
 						rhymes.add(URLDecoder.decode(this.redis.get(id),
 								this.encoding));
 					}
@@ -345,11 +365,11 @@ public class RhymeStore {
 	/**
 	 * Makes a md5 sum of the given text.
 	 * 
-	 * @param value
-	 *            The text to sum.
+	 * @param value The text to sum.
 	 * @return The md5 sum of the given text.
 	 */
-	protected String sum(final String value) {
+	protected String sum(final String value)
+	{
 		return DigestUtils.md5Hex(value.getBytes());
 	}
 }

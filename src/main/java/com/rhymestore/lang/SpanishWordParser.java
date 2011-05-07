@@ -48,13 +48,13 @@ public class SpanishWordParser implements WordParser
 	public static enum SpanishNumber
 	{
 		UNO("1", "uno"), DOS("2", "dos"), TRES("3", "tres"), CUATRO("4",
-		        "cuatro"), CINCO("5", "cinco"), SEIS("6", "seis"), SIETE("7",
-		        "siete"), OCHO("8", "ocho"), NUEVE("9", "nueve"), DIEZ("10",
-		        "diez"), ONCE("11", "once"), DOCE("12", "doce"), TRECE("13",
-		        "trece"), CATORCE("14", "catorce"), QUINCE("15", "quince"), CERO(
-		        "0", "cero"), VEINTE("20", "veinte"), DECENAS("70", "enta"), CIEN(
-		        "100", "cien"), CIENTOS("700", "cientos"), MIL("7000", "mil"), MILLON(
-		        "100000000", "millón"), MILLONES("700000000", "millones");
+				"cuatro"), CINCO("5", "cinco"), SEIS("6", "seis"), SIETE("7",
+				"siete"), OCHO("8", "ocho"), NUEVE("9", "nueve"), DIEZ("10",
+				"diez"), ONCE("11", "once"), DOCE("12", "doce"), TRECE("13",
+				"trece"), CATORCE("14", "catorce"), QUINCE("15", "quince"), CERO(
+				"0", "cero"), VEINTE("20", "veinte"), DECENAS("70", "enta"), CIEN(
+				"100", "cien"), CIENTOS("700", "cientos"), MIL("7000", "mil"), MILLON(
+				"100000000", "millón"), MILLONES("700000000", "millones");
 		public static String getBaseSound(long number)
 		{
 			return SpanishNumber.getBaseSound(String.valueOf(number));
@@ -74,7 +74,7 @@ public class SpanishWordParser implements WordParser
 
 			number = trim(number);
 			if (new BigDecimal(number).compareTo(BigDecimal
-			        .valueOf(Long.MAX_VALUE)) > 0)
+					.valueOf(Long.MAX_VALUE)) > 0)
 			{
 				number = SpanishNumber.handlingValue(number);
 			}
@@ -82,19 +82,15 @@ public class SpanishWordParser implements WordParser
 			// no leading zeros
 			number = n.toString();
 			char[] digits = number.toCharArray();
-			switch (number.length())
-			{
-			case 1:
-			{
+			switch (number.length()) {
+			case 1: {
 				return SpanishNumber.getWordByNumber(number);
 
 			}
-			case 2:
-			{
+			case 2: {
 				return SpanishNumber.tenners(n);
 			}
-			case 3:
-			{
+			case 3: {
 
 				// es un ciento *
 				if (n % 100 == 0)
@@ -108,11 +104,10 @@ public class SpanishWordParser implements WordParser
 				}
 				// 10 - 15
 				return SpanishNumber.tenners(Integer.parseInt(digits[1] + ""
-				        + digits[2]));
+						+ digits[2]));
 			}
 			case 4:
-			case 5:
-			{
+			case 5: {
 				// mil
 				if (n % 1000 == 0)
 				{
@@ -129,11 +124,10 @@ public class SpanishWordParser implements WordParser
 				}
 				// 10 - 15
 				return SpanishNumber.tenners(Integer
-				        .parseInt(digits[digits.length - 2] + ""
-				                + digits[digits.length - 1]));
+						.parseInt(digits[digits.length - 2] + ""
+								+ digits[digits.length - 1]));
 			}
-			default:
-			{
+			default: {
 				// recursividad!
 
 				if (n % 1000000 == 0)
@@ -143,7 +137,8 @@ public class SpanishWordParser implements WordParser
 						return SpanishNumber.MILLON.MILLON.getWord();
 					}
 					return SpanishNumber.MILLONES.getWord();
-				} else if (n % 100000 == 0)
+				}
+				else if (n % 100000 == 0)
 				{
 					return SpanishNumber.MIL.getWord();
 				}
@@ -294,8 +289,7 @@ public class SpanishWordParser implements WordParser
 
 	private static final boolean acento(final char letter)
 	{
-		switch (letter)
-		{
+		switch (letter) {
 		case 225: // a con acento
 		case 233: // e con acento
 		case 237: // i con acento
@@ -313,7 +307,7 @@ public class SpanishWordParser implements WordParser
 		for (char letter : letters)
 		{
 			if (SpanishWordParser.isVocal(letter)
-			        && SpanishWordParser.acento(letter))
+					&& SpanishWordParser.acento(letter))
 			{
 				return true;
 			}
@@ -334,9 +328,9 @@ public class SpanishWordParser implements WordParser
 
 		// si termina en vocal 'n' o 's' y tiene acento => aguda
 		char lastVocal = silaba
-		        .charAt(SpanishWordParser.lastVocalIndex(silaba));
+				.charAt(SpanishWordParser.lastVocalIndex(silaba));
 		if (((last == 'n') || (last == 's') || SpanishWordParser.isVocal(last))
-		        && SpanishWordParser.acento(lastVocal))
+				&& SpanishWordParser.acento(lastVocal))
 		{
 			return true;
 		}
@@ -378,8 +372,7 @@ public class SpanishWordParser implements WordParser
 
 	private static final boolean isVocal(final char letter)
 	{
-		switch (letter)
-		{
+		switch (letter) {
 		case 'a':
 		case 'e':
 		case 'i':
@@ -408,7 +401,7 @@ public class SpanishWordParser implements WordParser
 		}
 
 		throw new IllegalArgumentException(
-		        "It is impossible to have a word without vowels");
+				"It is impossible to have a word without vowels");
 	}
 
 	private static boolean llana(final String[] silabas)
@@ -422,7 +415,8 @@ public class SpanishWordParser implements WordParser
 			if (SpanishWordParser.acento(vocal))
 			{
 				return true;
-			} else
+			}
+			else
 			{
 				for (String s : silabas)
 				{
@@ -457,7 +451,7 @@ public class SpanishWordParser implements WordParser
 			if (propertyName.startsWith(Configuration.DEFAULT_RHYME_PROPERTY))
 			{
 				this.defaultRhymes.add(Configuration
-				        .getConfigValue(propertyName));
+						.getConfigValue(propertyName));
 			}
 		}
 	}
@@ -467,7 +461,7 @@ public class SpanishWordParser implements WordParser
 		boolean cer;
 		cer = false;
 		if ((a == 'b') || (a == 'c') || (a == 'd') || (a == 'f') || (a == 'g')
-		        || (a == 'p') || (a == 'r') || (a == 't'))
+				|| (a == 'p') || (a == 'r') || (a == 't'))
 		{
 			if (b == 'r')
 			{
@@ -475,7 +469,7 @@ public class SpanishWordParser implements WordParser
 			}
 		}
 		if ((a == 'b') || (a == 'c') || (a == 'f') || (a == 'g') || (a == 'p')
-		        || (a == 't') || (a == 'l') || (a == 'k'))
+				|| (a == 't') || (a == 'l') || (a == 'k'))
 		{
 			if (b == 'l')
 			{
@@ -496,45 +490,51 @@ public class SpanishWordParser implements WordParser
 	public String getDefaultRhyme()
 	{
 		return this.defaultRhymes.get(this.lastUsedDefault++
-		        % this.defaultRhymes.size());
+				% this.defaultRhymes.size());
 	}
 
 	private boolean hiato(final char v, final char v2)
 	{ // Estable si hay
-	  // separacion
+		// separacion
 		boolean cer = false;
 		if (this.letra(v) < 4)
 		{ // VA + ?
 			if (this.letra(v2) < 4)
 			{
 				cer = true;
-			} else
+			}
+			else
 			{ // VA+ VC
 				if ((v2 == 237) || (v2 == 250)) // i o u con acento
 				{
 					cer = true;
-				} else
+				}
+				else
 				{
 					cer = false;
 				}
 			}
-		} else
+		}
+		else
 		{ // VC + ?
 			if (this.letra(v2) < 4)
 			{ // VC + VA
 				if ((v == 237) || (v == 250)) // i o u con acento
 				{
 					cer = true;
-				} else
+				}
+				else
 				{
 					cer = false;
 				}
-			} else
+			}
+			else
 			{// VC + VC
 				if (v == v2)
 				{
 					cer = true;
-				} else
+				}
+				else
 				{
 					cer = false;
 				}
@@ -556,8 +556,7 @@ public class SpanishWordParser implements WordParser
 
 		// others: check extended ascii codes specific letters
 
-		switch (letter)
-		{
+		switch (letter) {
 		case 193: // A con acento
 		case 201: // E con acento
 		case 205: // I con acento
@@ -625,8 +624,7 @@ public class SpanishWordParser implements WordParser
 		ascii = c;
 		if (ascii != -1)
 		{
-			switch (ascii)
-			{
+			switch (ascii) {
 			case 97: // a
 				i = 1;
 				break;
@@ -682,8 +680,7 @@ public class SpanishWordParser implements WordParser
 
 		for (int i = 0; i < letters.length; i++)
 		{
-			switch (letters[i])
-			{
+			switch (letters[i]) {
 			// Vocales
 			case 225: // a con acento
 				result.append('a');
@@ -723,10 +720,11 @@ public class SpanishWordParser implements WordParser
 			// g => transformarla en 'j' si va antes de 'e' o 'i'
 			case 'g':
 				if ((i + 1 < letters.length)
-				        && ((letters[i + 1] == 'e') || (letters[i + 1] == 'i')))
+						&& ((letters[i + 1] == 'e') || (letters[i + 1] == 'i')))
 				{
 					result.append('j');
-				} else
+				}
+				else
 				{
 					result.append('g');
 				}
@@ -745,8 +743,7 @@ public class SpanishWordParser implements WordParser
 	/**
 	 * Removes the trailing punctuation from the given string
 	 * 
-	 * @param str
-	 *            The String to parse.
+	 * @param str The String to parse.
 	 * @return The String without the trailing punctuation
 	 */
 	public String removeTrailingPunctuation(final String str)
@@ -801,7 +798,7 @@ public class SpanishWordParser implements WordParser
 		if (SpanishWordParser.aguda(syllables))
 		{
 			int lastVocal = SpanishWordParser
-			        .lastVocalIndex(syllables[syllables.length - 1]);
+					.lastVocalIndex(syllables[syllables.length - 1]);
 			return syllables[syllables.length - 1].substring(lastVocal);
 		}
 
@@ -809,9 +806,9 @@ public class SpanishWordParser implements WordParser
 		if (SpanishWordParser.llana(syllables))
 		{
 			int lastVocal = SpanishWordParser
-			        .lastVocalIndex(syllables[syllables.length - 2]);
+					.lastVocalIndex(syllables[syllables.length - 2]);
 			return syllables[syllables.length - 2].substring(lastVocal)
-			        + syllables[syllables.length - 1];
+					+ syllables[syllables.length - 1];
 		}
 
 		// Esdrujula
@@ -822,11 +819,12 @@ public class SpanishWordParser implements WordParser
 			if (found)
 			{
 				parte += silaba;
-			} else if (SpanishWordParser.acento(silaba))
+			}
+			else if (SpanishWordParser.acento(silaba))
 			{
 				found = true;
 				parte = silaba.substring(SpanishWordParser
-				        .lastVocalIndex(silaba));
+						.lastVocalIndex(silaba));
 			}
 		}
 
@@ -849,19 +847,23 @@ public class SpanishWordParser implements WordParser
 					if (this.hiato(x, y))
 					{
 						s = str.substring(0, 1);
-					} else
+					}
+					else
 					{
 						s = str;
 					}
-				} else
+				}
+				else
 				{
 					s = str;
 				}
-			} else
+			}
+			else
 			{
 				s = str;
 			}
-		} else
+		}
+		else
 		{
 			x = str.charAt(0);
 			y = str.charAt(1);
@@ -875,27 +877,32 @@ public class SpanishWordParser implements WordParser
 						if (this.hiato(x, y))
 						{
 							s = str.substring(0, 1);
-						} else
+						}
+						else
 						{
 							if (this.hiato(y, z))
 							{
 								s = str.substring(0, 2);
-							} else
+							}
+							else
 							{
 								s = str.substring(0, 3);
 							}
 						}
-					} else
+					}
+					else
 					{ // V V C
 						if (this.hiato(x, y))
 						{
 							s = str.substring(0, 1);
-						} else
+						}
+						else
 						{
 							s = str.substring(0, 2);
 						}
 					}
-				} else
+				}
+				else
 				{ // V C ?
 					if (this.letra(z) < 6)
 					{ // V C V
@@ -904,26 +911,31 @@ public class SpanishWordParser implements WordParser
 							if (this.hiato(x, z))
 							{
 								s = str.substring(0, 1);
-							} else
+							}
+							else
 							{
 								s = str.substring(0, 3);
 							}
-						} else
+						}
+						else
 						{
 							s = str.substring(0, 1);
 						}
-					} else
+					}
+					else
 					{ // V C C
 						if (this.consonantes1(y, z))
 						{
 							s = str.substring(0, 1);
-						} else
+						}
+						else
 						{
 							s = str.substring(0, 2);
 						}
 					}
 				}
-			} else
+			}
+			else
 			{ // C ??
 				if (this.letra(y) < 6)
 				{ // C V ?
@@ -931,40 +943,47 @@ public class SpanishWordParser implements WordParser
 					{ // C V V
 						temp = str.substring(0, 3);
 						if (temp.equals("que") || temp.equals("qui")
-						        || temp.equals("gue") || temp.equals("gui"))
+								|| temp.equals("gue") || temp.equals("gui"))
 						{
 							s = str.substring(0, 3);
-						} else
+						}
+						else
 						{
 							if (this.hiato(y, z))
 							{
 								s = str.substring(0, 2);
-							} else
+							}
+							else
 							{
 								s = str.substring(0, 3);
 							}
 						}
-					} else
+					}
+					else
 					{ // C V C
 						s = str.substring(0, 2);
 					}
-				} else
+				}
+				else
 				{ // C C ?
 					if (this.letra(z) < 6)
 					{ // C C V
 						if (this.consonantes1(x, y))
 						{
 							s = str.substring(0, 3);
-						} else
+						}
+						else
 						{
 							s = str.substring(0, 1);
 						}
-					} else
+					}
+					else
 					{ // C C C
 						if (this.consonantes1(y, z))
 						{
 							s = str.substring(0, 1);
-						} else
+						}
+						else
 						{
 							s = str.substring(0, 1);
 						}
@@ -996,22 +1015,26 @@ public class SpanishWordParser implements WordParser
 			if (i == 0)
 			{
 				s = s + temp;
-			} else
+			}
+			else
 			{
 				if (this.strConsonantes(temp))
 				{
 					s = s + temp;
-				} else
+				}
+				else
 				{
 					if (this.strVVstr(s, temp))
 					{
 						s = s + temp;
-					} else
+					}
+					else
 					{
 						if (this.strConsonantes(s))
 						{
 							s = s + temp;
-						} else
+						}
+						else
 						{
 							s = s + "-" + temp;
 						}
@@ -1052,16 +1075,20 @@ public class SpanishWordParser implements WordParser
 		if (silabas.length == 1)
 		{
 			return StressType.LAST;
-		} else if (SpanishWordParser.esdrujula(silabas))
+		}
+		else if (SpanishWordParser.esdrujula(silabas))
 		{
 			return StressType.THIRD_LAST;
-		} else if (SpanishWordParser.aguda(silabas))
+		}
+		else if (SpanishWordParser.aguda(silabas))
 		{
 			return StressType.LAST;
-		} else if (SpanishWordParser.llana(silabas))
+		}
+		else if (SpanishWordParser.llana(silabas))
 		{
 			return StressType.SECOND_LAST;
-		} else
+		}
+		else
 		{
 			return StressType.FOURTH_LAST;
 		}
@@ -1069,7 +1096,7 @@ public class SpanishWordParser implements WordParser
 
 	private boolean strVVstr(final String s1, final String s2)
 	{ // Estable si
-	  // hay union
+		// hay union
 		boolean cer;
 		char c1, c2;
 		c1 = s1.charAt(s1.length() - 1);
@@ -1080,7 +1107,8 @@ public class SpanishWordParser implements WordParser
 			if (this.hiato(c1, c2))
 			{
 				cer = false;
-			} else
+			}
+			else
 			{
 				cer = true;
 			}

@@ -38,48 +38,48 @@ import com.rhymestore.store.RhymeStore;
  */
 public class APIController extends HttpMethodController
 {
-    /** The Rhyme store. */
-    private final RhymeStore store;
+	/** The Rhyme store. */
+	private final RhymeStore store;
 
-    /**
-     * Creates the API {@link Controller}.
-     */
-    public APIController()
-    {
-        store = RhymeStore.getInstance();
-    }
+	/**
+	 * Creates the API {@link Controller}.
+	 */
+	public APIController()
+	{
+		store = RhymeStore.getInstance();
+	}
 
-    /**
-     * Handles GET requests to the mapped resource.
-     * 
-     * @param request The request.
-     * @param response The response.
-     * @throws Exception If an error occurs during request processing.
-     */
-    public void get(final HttpServletRequest request, final HttpServletResponse response)
-        throws Exception
-    {
-        Rhyme rhyme = new Rhyme();
-        bindAndValidate(rhyme, request);
+	/**
+	 * Handles GET requests to the mapped resource.
+	 * 
+	 * @param request The request.
+	 * @param response The response.
+	 * @throws Exception If an error occurs during request processing.
+	 */
+	public void get(final HttpServletRequest request,
+			final HttpServletResponse response) throws Exception
+	{
+		Rhyme rhyme = new Rhyme();
+		bindAndValidate(rhyme, request);
 
-        if (!errors())
-        {
-            try
-            {
-                String rhymeResponse = store.getRhyme(rhyme.getRhyme());
-                setModel(rhymeResponse);
-            }
-            catch (Exception ex)
-            {
-                error("Could not get rhyme: " + ex.getMessage());
-            }
-        }
+		if (!errors())
+		{
+			try
+			{
+				String rhymeResponse = store.getRhyme(rhyme.getRhyme());
+				setModel(rhymeResponse);
+			}
+			catch (Exception ex)
+			{
+				error("Could not get rhyme: " + ex.getMessage());
+			}
+		}
 
-        if (errors())
-        {
-            setView("errors");
-        }
+		if (errors())
+		{
+			setView("errors");
+		}
 
-        response.setContentType("text/xml; charset=ISO-8859-1");
-    }
+		response.setContentType("text/xml; charset=ISO-8859-1");
+	}
 }

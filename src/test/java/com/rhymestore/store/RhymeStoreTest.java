@@ -37,43 +37,45 @@ import org.testng.annotations.Test;
  */
 public class RhymeStoreTest
 {
-    /** The Redis test database. */
-    public static final int TEST_DATABASE = 1;
+	/** The Redis test database. */
+	public static final int TEST_DATABASE = 1;
 
-    /** The store to test. */
-    private RhymeStore store;
+	/** The store to test. */
+	private RhymeStore store;
 
-    @BeforeMethod
-    public void setUp() throws IOException
-    {
-        store = new TestRhymeStore();
+	@BeforeMethod
+	public void setUp() throws IOException
+	{
+		store = new TestRhymeStore();
 		store.add("Ya son veintidós!!");
-        store.add("Me escondo y no me ves");
-    }
+		store.add("Me escondo y no me ves");
+	}
 
-    @AfterMethod
-    public void tearDown() throws IOException
-    {
-        ((TestRhymeStore) store).cleanDB();
-    }
+	@AfterMethod
+	public void tearDown() throws IOException
+	{
+		((TestRhymeStore) store).cleanDB();
+	}
 
-    @Test
-    public void testFindAll() throws IOException
-    {
-        assertEquals(store.findAll().size(), 2);
-    }
+	@Test
+	public void testFindAll() throws IOException
+	{
+		assertEquals(store.findAll().size(), 2);
+	}
 
-    @Test
-    public void testGetRhyme() throws IOException
-    {
-        assertEquals(store.getRhyme("¿Hay algo que rime con tres?"), "Me escondo y no me ves");
+	@Test
+	public void testGetRhyme() throws IOException
+	{
+		assertEquals(store.getRhyme("¿Hay algo que rime con tres?"),
+				"Me escondo y no me ves");
 		assertEquals(store.getRhyme("Nada rima con dos"), "Ya son veintidós!!");
-		assertEquals(store.getRhyme("Nada rima con 3"), "Me escondo y no me ves");
-    }
+		assertEquals(store.getRhyme("Nada rima con 3"),
+				"Me escondo y no me ves");
+	}
 
-    @Test(expectedExceptions = UnsupportedOperationException.class)
-    public void testDeleteRhyme() throws IOException
-    {
-        store.delete("");
-    }
+	@Test(expectedExceptions = UnsupportedOperationException.class)
+	public void testDeleteRhyme() throws IOException
+	{
+		store.delete("");
+	}
 }
