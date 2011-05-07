@@ -47,7 +47,7 @@ public class RhymeStoreTest
     public void setUp() throws IOException
     {
         store = new TestRhymeStore();
-        store.add("Ya son veintid¡ós!!");
+		store.add("Ya son veintidós!!");
         store.add("Me escondo y no me ves");
     }
 
@@ -67,7 +67,8 @@ public class RhymeStoreTest
     public void testGetRhyme() throws IOException
     {
         assertEquals(store.getRhyme("¿Hay algo que rime con tres?"), "Me escondo y no me ves");
-        assertEquals(store.getRhyme("Nada rima con dos"), "Ya son veintid¡ós!!");
+		assertEquals(store.getRhyme("Nada rima con dos"), "Ya son veintidós!!");
+		assertEquals(store.getRhyme("Nada rima con 3"), "Me escondo y no me ves");
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class)

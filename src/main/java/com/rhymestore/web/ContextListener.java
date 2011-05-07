@@ -22,6 +22,7 @@
 
 package com.rhymestore.web;
 
+import java.io.File;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -140,12 +141,14 @@ public class ContextListener implements ServletContextListener
             try
             {
                 // Ensure there won't be SSL certificate issues
-                SSLUtils.installIgnoreCertTrustManager();
-                URL url = new URL(rhymesURI);
-                URLConnection conn = url.openConnection();
+				// SSLUtils.installIgnoreCertTrustManager();
+				// URL url = new URL(rhymesURI);
+				// URLConnection conn = url.openConnection();
 
-                // Load the rhymes from the configured URI
-                new RhymeLoader().load(conn.getInputStream());
+				File rhymes = new File(rhymesURI);
+				// Load the rhymes from the configured URI
+				// new RhymeLoader().load(conn.getInputStream());
+				new RhymeLoader().load(rhymes);
             }
             catch (Exception ex)
             {
