@@ -63,7 +63,7 @@ public class WordUtils
 	 */
 	public static String getLastWord(final String sentence)
 	{
-		String last = null;
+		String last = "";
 
 		if (sentence != null)
 		{

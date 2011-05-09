@@ -88,8 +88,10 @@ public class RhymeStoreTest
 	@Test
 	public void testGetRhyme() throws IOException
 	{
-		Assert.assertEquals(this.store.getRhyme("¿Hay algo que rime con tres?"),
+		Assert.assertEquals(
+				this.store.getRhyme("¿Hay algo que rime con tres?"),
 				"Me escondo y no me ves");
-		Assert.assertEquals(this.store.getRhyme("Nada rima con dos"), "Ya son veintid¡ós!!");
+		Assert.assertEquals(this.store.getRhyme("Nada rima con dos"),
+				"Ya son veintidós!!");
 	}
 }
