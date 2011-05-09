@@ -53,10 +53,10 @@ public class WordParserFactory
 	@SuppressWarnings("unchecked")
 	public static WordParser getWordParser() throws ConfigurationException
 	{
-		if (wordParser == null)
+		if (WordParserFactory.wordParser == null)
 		{
 			String className = Configuration
-					.getConfigValue(Configuration.WORDPARSER_PROPERTY);
+			.getRequiredConfigValue(Configuration.WORDPARSER_PROPERTY);
 
 			if (className == null)
 			{
@@ -65,7 +65,7 @@ public class WordParserFactory
 								+ " property not defined");
 			}
 
-			LOGGER.info("Using WordParser: {}", className);
+			WordParserFactory.LOGGER.info("Using WordParser: {}", className);
 
 			try
 			{
@@ -73,7 +73,7 @@ public class WordParserFactory
 						.getContextClassLoader();
 				Class<? extends WordParser> clazz = (Class<? extends WordParser>) Class
 						.forName(className, true, classLoader);
-				wordParser = clazz.newInstance();
+				WordParserFactory.wordParser = clazz.newInstance();
 			}
 			catch (Exception ex)
 			{
@@ -83,6 +83,6 @@ public class WordParserFactory
 			}
 		}
 
-		return wordParser;
+		return WordParserFactory.wordParser;
 	}
 }

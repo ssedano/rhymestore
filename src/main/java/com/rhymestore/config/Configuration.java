@@ -112,10 +112,10 @@ public class Configuration
 	/**
 	 * Get the configuration value for the given property name.
 	 * 
-	 * @return The value for the given property or <code>null</code> if the
-	 *         value is not defined.
+	 * @return The value for the given property.
+	 * @throws ConfigurationException If the property does not exist.
 	 */
-	public static String getConfigValue(final String propertyName)
+	public static String getRequiredConfigValue(final String propertyName)
 	{
 		String value = getConfiguration().getProperty(propertyName);
 
@@ -126,5 +126,16 @@ public class Configuration
 		}
 
 		return value;
+	}
+
+	/**
+	 * Get the configuration value for the given property name.
+	 * 
+	 * @return The value for the given property or <code>null</code> if the
+	 *         value is not defined.
+	 */
+	public static String getConfigValue(final String propertyName)
+	{
+		return getConfiguration().getProperty(propertyName);
 	}
 }

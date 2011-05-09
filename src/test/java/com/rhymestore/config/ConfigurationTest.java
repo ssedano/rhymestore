@@ -20,51 +20,40 @@
  * THE SOFTWARE.
  */
 
-package com.rhymestore.util;
+package com.rhymestore.config;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
+import static com.rhymestore.config.Configuration.REDIS_HOST_PROPERTY;
+import static com.rhymestore.config.Configuration.getConfigValue;
+import static com.rhymestore.config.Configuration.getRequiredConfigValue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * Integration tests for the {@link SSLUtils} class.
+ * Unit tests for the {@link Configuration} class.
  * 
  * @author Ignasi Barrera
+ * 
  */
-public class SSLUtilsIT
+public class ConfigurationTest
 {
-    /** Default SSL URL used in tests. */
-    private static final String DETAULT_SSL_URL =
-        "https://github.com/nacx/rhymestore/raw/master/README.md";
+	@Test
+	public void testGetConfigValue()
+	{
+		assertNull(getConfigValue("unexisting"));
+		assertEquals(getConfigValue(REDIS_HOST_PROPERTY), "localhost");
+	}
 
-    @Test
-    public void testInstallTrustManager() throws Exception
-    {
-        SSLUtils.installIgnoreCertTrustManager();
-    }
+	@Test
+	public void testGetRequiredConfigValue()
+	{
+		assertEquals(getRequiredConfigValue(REDIS_HOST_PROPERTY), "localhost");
+	}
 
-    @Test
-    public void testLoadHttpsURL() throws Exception
-    {
-        SSLUtils.installIgnoreCertTrustManager();
-
-        URL url = new URL(SSLUtilsIT.DETAULT_SSL_URL);
-        URLConnection conn = url.openConnection();
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        String line = br.readLine();
-        int numLines = 0;
-
-        while (line != null)
-        {
-            line = br.readLine();
-            numLines++;
-        }
-
-        Assert.assertTrue(numLines > 0);
-    }
+	@Test(expectedExceptions = ConfigurationException.class)
+	public void testGetUnexistingRequiredConfigValue()
+	{
+		getRequiredConfigValue("unexisting");
+	}
 }

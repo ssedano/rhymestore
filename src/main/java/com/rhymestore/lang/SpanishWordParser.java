@@ -451,7 +451,7 @@ public class SpanishWordParser implements WordParser
 			if (propertyName.startsWith(Configuration.DEFAULT_RHYME_PROPERTY))
 			{
 				this.defaultRhymes.add(Configuration
-						.getConfigValue(propertyName));
+						.getRequiredConfigValue(propertyName));
 			}
 		}
 	}
@@ -494,8 +494,7 @@ public class SpanishWordParser implements WordParser
 	}
 
 	private boolean hiato(final char v, final char v2)
-	{ // Estable si hay
-		// separacion
+	{ // Estable si hay separacion
 		boolean cer = false;
 		if (this.letra(v) < 4)
 		{ // VA + ?
@@ -1095,8 +1094,7 @@ public class SpanishWordParser implements WordParser
 	}
 
 	private boolean strVVstr(final String s1, final String s2)
-	{ // Estable si
-		// hay union
+	{ // Estable si hay union
 		boolean cer;
 		char c1, c2;
 		c1 = s1.charAt(s1.length() - 1);

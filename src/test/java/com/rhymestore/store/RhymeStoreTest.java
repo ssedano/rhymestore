@@ -22,10 +22,9 @@
 
 package com.rhymestore.store;
 
-import static org.testng.Assert.assertEquals;
-
 import java.io.IOException;
 
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -46,36 +45,53 @@ public class RhymeStoreTest
 	@BeforeMethod
 	public void setUp() throws IOException
 	{
-		store = new TestRhymeStore();
-		store.add("Ya son veintidós!!");
-		store.add("Me escondo y no me ves");
+		this.store = new TestRhymeStore();
+		this.store.add("Ya son veintidós!!");
+		this.store.add("Me escondo y no me ves");
 	}
 
 	@AfterMethod
 	public void tearDown() throws IOException
 	{
-		((TestRhymeStore) store).cleanDB();
+		((TestRhymeStore) this.store).cleanDB();
+	}
+
+	@Test
+	public void testDeleteExistingRhyme() throws IOException
+	{
+		this.store.delete("Ya son veintidós!!");
+		Assert.assertEquals(this.store.findAll().size(), 1);
+
+		this.store.delete("Me escondo y no me ves");
+		Assert.assertTrue(this.store.findAll().isEmpty());
+	}
+
+	@Test(expectedExceptions = IOException.class)
+	public void testDeleteUnexistingRhyme() throws IOException
+	{
+		this.store.delete("Unexisting");
+	}
+
+	@Test
+	public void testDeleteWithoutText() throws IOException
+	{
+		this.store.delete(null);
+		this.store.delete("");
 	}
 
 	@Test
 	public void testFindAll() throws IOException
 	{
-		assertEquals(store.findAll().size(), 2);
+		Assert.assertEquals(this.store.findAll().size(), 2);
 	}
 
 	@Test
 	public void testGetRhyme() throws IOException
 	{
-		assertEquals(store.getRhyme("¿Hay algo que rime con tres?"),
+		Assert.assertEquals(
+				this.store.getRhyme("¿Hay algo que rime con tres?"),
 				"Me escondo y no me ves");
-		assertEquals(store.getRhyme("Nada rima con dos"), "Ya son veintidós!!");
-		assertEquals(store.getRhyme("Nada rima con 3"),
-				"Me escondo y no me ves");
-	}
-
-	@Test(expectedExceptions = UnsupportedOperationException.class)
-	public void testDeleteRhyme() throws IOException
-	{
-		store.delete("");
+		Assert.assertEquals(this.store.getRhyme("Nada rima con dos"),
+				"Ya son veintidós!!");
 	}
 }
