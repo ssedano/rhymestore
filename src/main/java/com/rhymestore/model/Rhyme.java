@@ -53,17 +53,17 @@ public class Rhyme implements Serializable
 
 	public Long getId()
 	{
-		return id;
+		return this.id;
+	}
+
+	public String getRhyme()
+	{
+		return this.rhyme;
 	}
 
 	public void setId(Long id)
 	{
 		this.id = id;
-	}
-
-	public String getRhyme()
-	{
-		return rhyme;
 	}
 
 	public void setRhyme(String rhyme)

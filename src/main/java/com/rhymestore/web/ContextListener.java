@@ -22,7 +22,6 @@
 
 package com.rhymestore.web;
 
-import java.io.File;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -50,7 +49,7 @@ public class ContextListener implements ServletContextListener
 {
 	/** The logger. */
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(ContextListener.class);
+	.getLogger(ContextListener.class);
 
 	/** Context attribute name used to store the Twitter user. */
 	public static final String TWITTER_USER_NAME = "TWITTER_USER_NAME";
@@ -65,57 +64,93 @@ public class ContextListener implements ServletContextListener
 	private Twitter twitter;
 
 	@Override
+	public void contextDestroyed(final ServletContextEvent sce)
+	{
+		if (this.twitterEnabled(sce))
+		{
+			ContextListener.LOGGER
+			.info("Shutting down the Twitter API scheduler");
+
+			this.twitterScheduler.shutdown(); // Stop scheduler
+		}
+
+		ContextListener.LOGGER.info("Disconnecting from Twitter");
+
+		this.twitter.shutdown(); // Disconnect from Twitter
+	}
+
+	@Override
 	public void contextInitialized(final ServletContextEvent sce)
 	{
 		// Starts the Twitter scheduler
-		if (twitterEnabled(sce))
+		if (this.twitterEnabled(sce))
 		{
 			// Connects to Twitter
-			twitter = new TwitterFactory().getInstance();
+			this.twitter = new TwitterFactory().getInstance();
 
 			try
 			{
-				LOGGER.info("Connected to Twitter as: {}",
-						twitter.getScreenName());
+				ContextListener.LOGGER.info("Connected to Twitter as: {}",
+						this.twitter.getScreenName());
 
 				// Store the user name in the servlet context to make it
 				// available
 				// to Controllers
-				sce.getServletContext().setAttribute(TWITTER_USER_NAME,
-						twitter.getScreenName());
+				sce.getServletContext().setAttribute(
+						ContextListener.TWITTER_USER_NAME,
+						this.twitter.getScreenName());
 			}
 			catch (TwitterException ex)
 			{
-				LOGGER.error("Could not get the Twitter username", ex);
+				ContextListener.LOGGER.error(
+						"Could not get the Twitter username", ex);
 			}
 
-			LOGGER.info("Starting the Twitter API scheduler");
+			ContextListener.LOGGER.info("Starting the Twitter API scheduler");
 
-			twitterScheduler = new TwitterScheduler(twitter);
-			twitterScheduler.start();
+			this.twitterScheduler = new TwitterScheduler(this.twitter);
+			this.twitterScheduler.start();
 		}
 		else
 		{
-			LOGGER.info("Twitter communication is disabled");
+			ContextListener.LOGGER.info("Twitter communication is disabled");
 		}
 
 		// Load the default rhymes
-		loadDefaultRhymes();
+		this.loadDefaultRhymes();
 	}
 
-	@Override
-	public void contextDestroyed(final ServletContextEvent sce)
+	/**
+	 * Load the default rhymes, if the URI is defined.
+	 */
+	private void loadDefaultRhymes()
 	{
-		if (twitterEnabled(sce))
+		// Load the rhymes URI
+		String rhymesURI = Configuration
+		.getConfigValue(Configuration.DEFAULT_RHYMES_URI_PROPERTY);
+
+		if (rhymesURI != null)
 		{
-			LOGGER.info("Shutting down the Twitter API scheduler");
+			ContextListener.LOGGER.info("Adding rhymes from: {}", rhymesURI);
 
-			twitterScheduler.shutdown(); // Stop scheduler
+			try
+			{
+				// Ensure there won't be SSL certificate issues
+				SSLUtils.installIgnoreCertTrustManager();
+				URL url = new URL(rhymesURI);
+				URLConnection conn = url.openConnection();
+
+				// Load the rhymes from the configured URI
+				new RhymeLoader().load(conn.getInputStream());
+			}
+			catch (Exception ex)
+			{
+				ContextListener.LOGGER
+				.error("Could not load the default rhymes: "
+						+ ex.getMessage(), ex);
+			}
+
 		}
-
-		LOGGER.info("Disconnecting from Twitter");
-
-		twitter.shutdown(); // Disconnect from Twitter
 	}
 
 	/**
@@ -127,43 +162,8 @@ public class ContextListener implements ServletContextListener
 	private boolean twitterEnabled(final ServletContextEvent sce)
 	{
 		String enableTwitter = sce.getServletContext().getInitParameter(
-				TWITTER_ENABLE_PARAM_NAME);
-		return enableTwitter == null || enableTwitter.equals("true");
-	}
-
-	/**
-	 * Load the default rhymes, if the URI is defined.
-	 */
-	private void loadDefaultRhymes()
-	{
-		// Load the rhymes URI
-		String rhymesURI = Configuration
-				.getConfigValue(Configuration.DEFAULT_RHYMES_URI_PROPERTY);
-
-		if (rhymesURI != null)
-		{
-			LOGGER.info("Adding rhymes from: {}", rhymesURI);
-
-			try
-			{
-				// Ensure there won't be SSL certificate issues
-				// SSLUtils.installIgnoreCertTrustManager();
-				// URL url = new URL(rhymesURI);
-				// URLConnection conn = url.openConnection();
-
-				File rhymes = new File(rhymesURI);
-				// Load the rhymes from the configured URI
-				// new RhymeLoader().load(conn.getInputStream());
-				new RhymeLoader().load(rhymes);
-			}
-			catch (Exception ex)
-			{
-				LOGGER.error(
-						"Could not load the default rhymes: " + ex.getMessage(),
-						ex);
-			}
-
-		}
+				ContextListener.TWITTER_ENABLE_PARAM_NAME);
+		return (enableTwitter == null) || enableTwitter.equals("true");
 	}
 
 }

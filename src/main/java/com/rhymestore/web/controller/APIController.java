@@ -46,7 +46,7 @@ public class APIController extends HttpMethodController
 	 */
 	public APIController()
 	{
-		store = RhymeStore.getInstance();
+		this.store = RhymeStore.getInstance();
 	}
 
 	/**
@@ -60,24 +60,24 @@ public class APIController extends HttpMethodController
 			final HttpServletResponse response) throws Exception
 	{
 		Rhyme rhyme = new Rhyme();
-		bindAndValidate(rhyme, request);
+		this.bindAndValidate(rhyme, request);
 
-		if (!errors())
+		if (!this.errors())
 		{
 			try
 			{
-				String rhymeResponse = store.getRhyme(rhyme.getRhyme());
-				setModel(rhymeResponse);
+				String rhymeResponse = this.store.getRhyme(rhyme.getRhyme());
+				this.setModel(rhymeResponse);
 			}
 			catch (Exception ex)
 			{
-				error("Could not get rhyme: " + ex.getMessage());
+				this.error("Could not get rhyme: " + ex.getMessage());
 			}
 		}
 
-		if (errors())
+		if (this.errors())
 		{
-			setView("errors");
+			this.setView("errors");
 		}
 
 		response.setContentType("text/xml; charset=ISO-8859-1");

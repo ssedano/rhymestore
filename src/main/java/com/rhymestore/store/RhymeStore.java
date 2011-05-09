@@ -58,10 +58,10 @@ public class RhymeStore
 {
 	/** The logger. */
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(RhymeStore.class);
+	.getLogger(RhymeStore.class);
 
-	/** The Redis database API. */
-	protected final Jedis redis;
+	/** The key used to store the next id value. */
+	private static final String NEXT_ID_KEY = "next.id";
 
 	/** Redis namespace for sentences. */
 	private final Keymaker sentencens = new Keymaker("sentence");
@@ -73,7 +73,7 @@ public class RhymeStore
 	private final String encoding = "UTF-8";
 
 	/** The singleton instance of the store. */
-	public static RhymeStore instance;
+	private static RhymeStore instance;
 
 	/**
 	 * Gets the singleton instance of the store.
@@ -90,26 +90,25 @@ public class RhymeStore
 		return RhymeStore.instance;
 	}
 
-	/** The DAO used to persist the rhymes. */
-	// private RedisDao<Rhyme> rhymeDAO;
-
 	/** Parses the words to get the part used to rhyme. */
 	private final WordParser wordParser;
 
+	/** The Redis database API. */
+	protected final Jedis redis;
+
 	/**
-	 * Creates a new <code>RhymeStore</code> connecting to
-	 * <code>localhost</code> and the default Redis port.
+	 * Creates a new <code>RhymeStore</code> connecting to the configured Redis
+	 * database.
 	 */
 	protected RhymeStore()
 	{
 		String host = Configuration
-				.getConfigValue(Configuration.REDIS_HOST_PROPERTY);
+		.getRequiredConfigValue(Configuration.REDIS_HOST_PROPERTY);
 		String port = Configuration
-				.getConfigValue(Configuration.REDIS_PORT_PROPERTY);
+		.getRequiredConfigValue(Configuration.REDIS_PORT_PROPERTY);
 
 		this.redis = new Jedis(host, Integer.valueOf(port));
 		this.wordParser = WordParserFactory.getWordParser();
-		// rhymeDAO = RedisDaoFactory.getDAO(Rhyme.class);
 	}
 
 	/**
@@ -135,32 +134,39 @@ public class RhymeStore
 
 		this.connect();
 
-		String sentenceId = this.getUniqueId(this.sentencens,
+		String sentenceKey = this.getUniqueId(this.sentencens,
 				this.normalizeString(sentence));
-		sentenceId = this.sentencens.build(sentenceId).toString();
+		sentenceKey = this.sentencens.build(sentenceKey).toString();
 
-		if (this.redis.exists(sentenceId) == 1)
+		if (this.redis.exists(sentenceKey) == 1)
 		{
 			this.disconnect();
 			return;
 		}
 
 		// Insert sentence
-		this.redis.set(sentenceId, URLEncoder.encode(sentence, this.encoding));
+		this.redis.set(sentenceKey, URLEncoder.encode(sentence, this.encoding));
 
 		// Index sentence
-		String indexId = this.getUniqueId(this.indexns,
+		String indexKey = this.getUniqueId(this.indexns,
 				this.buildUniqueToken(rhyme, type));
-		indexId = this.indexns.build(indexId).toString();
+		indexKey = this.indexns.build(indexKey).toString();
 
-		this.redis.sadd(indexId, sentenceId);
+		this.redis.sadd(indexKey, sentenceKey);
 
 		this.disconnect();
 
 		RhymeStore.LOGGER.info("Added rhyme: {}", sentence);
 	}
 
-	protected String buildUniqueToken(final String rhyme, final StressType type)
+	/**
+	 * Build a unique token for the given rhyme to be used to index it.
+	 * 
+	 * @param rhyme The rhyme part of the sentence.
+	 * @param type The stress type of the rhyme.
+	 * @return The unique token for the rhyme.
+	 */
+	private String buildUniqueToken(final String rhyme, final StressType type)
 	{
 		return this.sum(type.name().concat(rhyme));
 	}
@@ -187,8 +193,58 @@ public class RhymeStore
 	 */
 	public void delete(final String sentence) throws IOException
 	{
-		throw new UnsupportedOperationException(
-				"Delete operation is not implemented yet.");
+		String word = WordUtils.getLastWord(sentence);
+
+		if (word.isEmpty())
+		{
+			return;
+		}
+
+		String rhyme = this.normalizeString(this.wordParser
+				.phoneticRhymePart(word));
+		StressType type = this.wordParser.stressType(word);
+
+		this.connect();
+
+		String sentenceKey = this.getUniqueIdKey(this.sentencens,
+				this.normalizeString(sentence));
+
+		if (this.redis.exists(sentenceKey) == 0)
+		{
+			this.disconnect();
+			throw new IOException("The element to remove does not exist.");
+		}
+
+		String indexKey = this.getUniqueIdKey(this.indexns,
+				this.buildUniqueToken(rhyme, type));
+		String sentenceId = this.redis.get(sentenceKey);
+		sentenceId = this.sentencens.build(sentenceId).toString();
+
+		// Remove the index
+		if (this.redis.exists(indexKey) == 1)
+		{
+			String indexId = this.redis.get(indexKey);
+			indexId = this.indexns.build(indexId).toString();
+
+			// Remove the sentence from the index
+			if (this.redis.exists(indexId) == 1)
+			{
+				this.redis.srem(indexId, sentenceId);
+			}
+
+			// Remove the index if empty
+			if (this.redis.smembers(indexId).isEmpty())
+			{
+				this.redis.del(indexId, indexKey);
+			}
+		}
+
+		// Remove the key
+		this.redis.del(sentenceId, sentenceKey);
+
+		this.disconnect();
+
+		RhymeStore.LOGGER.info("Deleted rhyme: {}", sentence);
 	}
 
 	/**
@@ -239,9 +295,15 @@ public class RhymeStore
 		return rhymes;
 	}
 
-	protected String getLastId(final Keymaker ns)
+	/**
+	 * Get the last used id in the given namespace.
+	 * 
+	 * @param ns The namespace.
+	 * @return The last used id in the given namespace.
+	 */
+	private String getLastId(final Keymaker ns)
 	{
-		return this.redis.get(ns.build("next.id").toString());
+		return this.redis.get(ns.build(RhymeStore.NEXT_ID_KEY).toString());
 	}
 
 	/**
@@ -282,7 +344,14 @@ public class RhymeStore
 		}
 	}
 
-	protected String getUniqueId(final Keymaker ns, final String token)
+	/**
+	 * Get a unique id id for the given token.
+	 * 
+	 * @param ns The namespace of the id.
+	 * @param token The token which id is requested.
+	 * @return The id for the given token.
+	 */
+	private String getUniqueId(final Keymaker ns, final String token)
 	{
 		String key = this.getUniqueIdKey(ns, token);
 		String id = this.redis.get(key);
@@ -292,7 +361,8 @@ public class RhymeStore
 			return id;
 		}
 
-		Integer next = this.redis.incr(ns.build("next.id").toString());
+		Integer next = this.redis.incr(ns.build(RhymeStore.NEXT_ID_KEY)
+				.toString());
 		id = next.toString();
 
 		if (this.redis.setnx(key, id) == 0)
@@ -303,13 +373,26 @@ public class RhymeStore
 		return id;
 	}
 
-	protected String getUniqueIdKey(final Keymaker ns, final String token)
+	/**
+	 * Get the key of the id for the given token.
+	 * 
+	 * @param ns The namespace of the key.
+	 * @param token The token which key is requested.
+	 * @return The key for the given token.
+	 */
+	private String getUniqueIdKey(final Keymaker ns, final String token)
 	{
 		String md = this.sum(token);
 		return ns.build(md, "id").toString();
 	}
 
-	protected String normalizeString(final String value)
+	/**
+	 * Normalizes the given string.
+	 * 
+	 * @param value The string to be normalized.
+	 * @return The normalized string.
+	 */
+	private String normalizeString(final String value)
 	{
 		// To lower case
 		String token = value.toLowerCase();
@@ -332,28 +415,28 @@ public class RhymeStore
 	 * @return A <code>Set</code> of rhymes for the given sentence.
 	 * @throws IOException If an error occurs while searching for the rhymes.
 	 */
-	protected Set<String> search(final String rhyme, final StressType type)
-			throws IOException
+	private Set<String> search(final String rhyme, final StressType type)
+	throws IOException
 	{
 		Set<String> rhymes = new HashSet<String>();
 		String norm = this.normalizeString(rhyme);
 
-		String uniqueId = this.getUniqueIdKey(this.indexns,
+		String indexKey = this.getUniqueIdKey(this.indexns,
 				this.buildUniqueToken(norm, type));
 
-		if (this.redis.exists(uniqueId) == 1)
+		if (this.redis.exists(indexKey) == 1)
 		{
-			String indexId = this.redis.get(uniqueId);
+			String indexId = this.redis.get(indexKey);
 			indexId = this.indexns.build(indexId).toString();
 
 			if (this.redis.exists(indexId) == 1)
 			{
-				for (String id : this.redis.smembers(indexId))
+				for (String sentenceKey : this.redis.smembers(indexId))
 				{
-					if (this.redis.exists(id) == 1)
+					if (this.redis.exists(sentenceKey) == 1)
 					{
-						rhymes.add(URLDecoder.decode(this.redis.get(id),
-								this.encoding));
+						rhymes.add(URLDecoder.decode(
+								this.redis.get(sentenceKey), this.encoding));
 					}
 				}
 			}
@@ -368,8 +451,9 @@ public class RhymeStore
 	 * @param value The text to sum.
 	 * @return The md5 sum of the given text.
 	 */
-	protected String sum(final String value)
+	private String sum(final String value)
 	{
 		return DigestUtils.md5Hex(value.getBytes());
 	}
+
 }

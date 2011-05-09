@@ -51,7 +51,7 @@ public class RhymeController extends MethodInvokingController
 {
 	/** The logger. */
 	private static final Logger LOGGER = LoggerFactory
-			.getLogger(RhymeController.class);
+	.getLogger(RhymeController.class);
 
 	/** The Rhyme store. */
 	private final RhymeStore store;
@@ -61,32 +61,7 @@ public class RhymeController extends MethodInvokingController
 	 */
 	public RhymeController()
 	{
-		store = RhymeStore.getInstance();
-	}
-
-	/**
-	 * Lists all rhymes in the the store.
-	 * 
-	 * @param request The request.
-	 * @param response The response.
-	 * @throws ControllerException If the rhyme cannot be added.
-	 */
-	public void list(final HttpServletRequest request,
-			final HttpServletResponse response) throws ControllerException
-	{
-		try
-		{
-			Set<String> rhymes = store.findAll();
-
-			List<String> sortedRhymes = new ArrayList<String>(rhymes);
-			Collections.sort(sortedRhymes, String.CASE_INSENSITIVE_ORDER);
-
-			setModel(sortedRhymes);
-		}
-		catch (Exception ex)
-		{
-			error("Could not get rhymes: " + ex.getMessage());
-		}
+		this.store = RhymeStore.getInstance();
 	}
 
 	/**
@@ -98,39 +73,41 @@ public class RhymeController extends MethodInvokingController
 	 */
 	public void add(final HttpServletRequest request,
 			final HttpServletResponse response) throws ControllerException
-	{
+			{
 		Rhyme rhyme = new Rhyme();
-		bindAndValidate(rhyme, request);
+		this.bindAndValidate(rhyme, request);
 
 		// Add the rhyme only if there are no binding or validation errors
-		if (!errors())
+		if (!this.errors())
 		{
-			String twitterUser = getTwitterUser(request, response);
-			if (twitterUser != null
+			String twitterUser = this.getTwitterUser(request, response);
+			if ((twitterUser != null)
 					&& rhyme.getRhyme()
-							.contains(TwitterUtils.user(twitterUser)))
+					.contains(TwitterUtils.user(twitterUser)))
 			{
-				error("Cannot add a rhyme that contains the Twitter user name");
+				this.error("Cannot add a rhyme that contains the Twitter user name");
 			}
 
-			if (!errors())
+			if (!this.errors())
 			{
 				try
 				{
 					String capitalized = WordUtils.capitalize(rhyme.getRhyme());
-					store.add(capitalized.trim());
+					this.store.add(capitalized.trim());
+
+					this.message("Added rhyme: " + capitalized);
 				}
 				catch (Exception ex)
 				{
-					error("Could not add rhyme: " + ex.getMessage());
+					this.error("Could not add rhyme: " + ex.getMessage());
 				}
 			}
 		}
 
 		// Load the new list of rhymes to render the list view
-		list(request, response);
-		setView("list");
-	}
+		this.list(request, response);
+		this.setView("list");
+			}
 
 	/**
 	 * Check if there is a rhyme submitted, and deletes it from the store.
@@ -141,27 +118,29 @@ public class RhymeController extends MethodInvokingController
 	 */
 	public void delete(final HttpServletRequest request,
 			final HttpServletResponse response) throws ControllerException
-	{
+			{
 		Rhyme rhyme = new Rhyme();
-		bindAndValidate(rhyme, request);
+		this.bindAndValidate(rhyme, request);
 
-		if (!errors())
+		if (!this.errors())
 		{
 			try
 			{
 				String capitalized = WordUtils.capitalize(rhyme.getRhyme());
-				store.delete(capitalized);
+				this.store.delete(capitalized);
+
+				this.message("Deleted rhyme: " + capitalized);
 			}
 			catch (Exception ex)
 			{
-				error("Could not delete rhyme: " + ex.getMessage());
+				this.error("Could not delete rhyme: " + ex.getMessage());
 			}
 		}
 
 		// Load the new list of rhymes to render the list view
-		list(request, response);
-		setView("list");
-	}
+		this.list(request, response);
+		this.setView("list");
+			}
 
 	/**
 	 * Download all the stored rhymes in a text file.
@@ -172,20 +151,21 @@ public class RhymeController extends MethodInvokingController
 	 */
 	public void download(final HttpServletRequest request,
 			final HttpServletResponse response) throws ControllerException
-	{
+			{
 		try
 		{
 			// Get all rhymes
-			Set<String> rhymes = store.findAll();
+			Set<String> rhymes = this.store.findAll();
 			List<String> sortedRhymes = new ArrayList<String>(rhymes);
 			Collections.sort(sortedRhymes, String.CASE_INSENSITIVE_ORDER);
 
-			LOGGER.info("Exporting {} rhymes...", sortedRhymes.size());
+			RhymeController.LOGGER.info("Exporting {} rhymes...",
+					sortedRhymes.size());
 
 			// Configure the response to generate an attachment
 			response.setContentType("text/plain");
 			response.setHeader("Content-Disposition",
-					"attachment; filename=rhymes.txt");
+			"attachment; filename=rhymes.txt");
 
 			// Write output
 			PrintWriter pw = new PrintWriter(response.getOutputStream());
@@ -200,10 +180,10 @@ public class RhymeController extends MethodInvokingController
 		}
 		catch (Exception ex)
 		{
-			error("Could not get rhymes: " + ex.getMessage());
-			setView("list");
+			this.error("Could not get rhymes: " + ex.getMessage());
+			this.setView("list");
 		}
-	}
+			}
 
 	/**
 	 * Gets the Twitter user.
@@ -216,7 +196,32 @@ public class RhymeController extends MethodInvokingController
 			final HttpServletResponse response)
 	{
 		return (String) request.getSession().getServletContext()
-				.getAttribute(ContextListener.TWITTER_USER_NAME);
+		.getAttribute(ContextListener.TWITTER_USER_NAME);
 	}
+
+	/**
+	 * Lists all rhymes in the the store.
+	 * 
+	 * @param request The request.
+	 * @param response The response.
+	 * @throws ControllerException If the rhyme cannot be added.
+	 */
+	public void list(final HttpServletRequest request,
+			final HttpServletResponse response) throws ControllerException
+			{
+		try
+		{
+			Set<String> rhymes = this.store.findAll();
+
+			List<String> sortedRhymes = new ArrayList<String>(rhymes);
+			Collections.sort(sortedRhymes, String.CASE_INSENSITIVE_ORDER);
+
+			this.setModel(sortedRhymes);
+		}
+		catch (Exception ex)
+		{
+			this.error("Could not get rhymes: " + ex.getMessage());
+		}
+			}
 
 }
